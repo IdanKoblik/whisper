@@ -69,3 +69,27 @@ POST /register
 | 400       | Invalid input |
 | 401       | Unauthorized  |
 <br>
+
+#### Unregister an existing user
+
+Requires X-Admin-Token header and user token as a URL parameter
+
+```http
+DELETE /unregister/{token}
+```
+
+
+**Header Parameters:**
+
+| Parameter       | Type     | Description               |
+| --------------- | -------- | ------------------------- |
+| `X-Admin-Token` | `string` | **Required**. Admin Token |
+
+**Responses:**
+
+| HTTP Code | Description                |
+| --------- | -------------------------- |
+| 200       | Successfully removed token |
+| 400       | Invalid input              |
+| 401       | Unauthorized               |
+<br>

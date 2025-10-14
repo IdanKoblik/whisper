@@ -36,33 +36,28 @@ func TestRegisterAndUnregisterUser(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
    defer cancel()
-   _, err = collection.DeleteOne(ctx, map[string]string{"_id": user.Owner})
+   _, err = collection.DeleteOne(ctx, map[string]string{"_id": user.Token})
    if err != nil {
       t.Fatalf("failed to cleanup user %s: %v", user.Owner, err)
    }
 
-	// Test RegisterUser success
 	err = service.RegisterUser(user)
 	assert.NoError(t, err)
 
-	// Test RegisterUser duplicate
 	err = service.RegisterUser(user)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "already exists")
 
-	// Check user exists in DB
 	ctx, cancel = context.WithTimeout(context.Background(), TIMEOUT)
 	defer cancel()
-	count, err := collection.CountDocuments(ctx, bson.M{"_id": user.Owner})
+	count, err := collection.CountDocuments(ctx, bson.M{"_id": user.Token})
 	assert.NoError(t, err)
 	assert.Equal(t, int64(1), count)
 
-	// Test UnregisterUser success
-	err = service.UnregisterUser(user.Owner)
+	err = service.UnregisterUser(user.Token)
 	assert.NoError(t, err)
 
-	// Test UnregisterUser for non-existing user
-	err = service.UnregisterUser(user.Owner)
+	err = service.UnregisterUser(user.Token)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "does not exists")
 }

@@ -1,12 +1,15 @@
 package endpoints
 
 import (
+	"fmt"
 	"os"
 	"regexp"
+	"time"
 	"whisper-api/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type RegisterEndpoint struct {
@@ -51,6 +54,7 @@ func (endpoint RegisterEndpoint) Handle(c *gin.Context) {
 		"owner": rawUser.Owner,
 		"subject": rawUser.Subject,
 		"subscribers": rawUser.Subscribers,
+		"identifier": fmt.Sprintf("%s-%s", uuid.New(), time.Now().String()),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtData)

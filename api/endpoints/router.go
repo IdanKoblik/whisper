@@ -26,6 +26,7 @@ func SetupRouter() *gin.Engine {
 
 	router.GET("/ping", PingEndpoint{}.Handle)
 	router.POST("/register", RegisterEndpoint{&userService}.Handle)
+	router.DELETE("/unregister/:token", UnregisterEndpoint{&userService}.Handle)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

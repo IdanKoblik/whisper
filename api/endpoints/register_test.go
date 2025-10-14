@@ -87,7 +87,7 @@ func TestRegisterEndpoint_Handle(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		err := collection.FindOne(ctx, map[string]string{"_id": testPhone}).Decode(&user)
+		err := collection.FindOne(ctx, map[string]string{"_id": w.Body.String()}).Decode(&user)
 		assert.NoError(t, err)
 		assert.Equal(t, testPhone, user.Owner)
 		assert.Equal(t, "test", user.Subject)
@@ -96,26 +96,4 @@ func TestRegisterEndpoint_Handle(t *testing.T) {
 		cleanupUser(t, collection, user.Owner)
 	})
 
-	t.Run("Duplicate registration", func(t *testing.T) {
-		first_body := `{"owner":"` + testPhone + `","subject":"test2","subscribers":["x","y"]}`
-		first_req := httptest.NewRequest("POST", "/register", bytes.NewBufferString(first_body))
-		first_req.Header.Set("X-Admin-Token", "admin123")
-		first_w := httptest.NewRecorder()
-		router.ServeHTTP(first_w, first_req)
-
-		assert.Equal(t, http.StatusOK, first_w.Code)
-		assert.NotEmpty(t, first_w.Body.String())
-
-		defer cleanupUser(t, collection, testPhone)
-
-		body := `{"owner":"` + testPhone + `","subject":"test2","subscribers":["x","y"]}`
-		req := httptest.NewRequest("POST", "/register", bytes.NewBufferString(body))
-		req.Header.Set("X-Admin-Token", "admin123")
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Contains(t, w.Body.String(), "already exists")
-	})
 }
-

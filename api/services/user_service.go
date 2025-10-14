@@ -16,8 +16,8 @@ type RawUser struct {
 }
 
 type User struct {
-	Owner string `bson:"_id" json:"id"`
-	Token string `bson:"token" json:"token"`
+	Token string `bson:"_id" json:"id"`
+	Owner string `bson:"owner" json:"owner"`
 	Subject string `bson:"subject" json:"subject"`
 	Subscribers []string `bson:"subscribers" json:"subscribers"`
 }
@@ -32,32 +32,32 @@ func (service *UserService) RegisterUser(user *User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
 	defer cancel()
 
-	count, err := service.Collection.CountDocuments(ctx, bson.M{"_id": user.Owner})
+	count, err := service.Collection.CountDocuments(ctx, bson.M{"_id": user.Token})
 	if err != nil {
 		return err
 	}
 	
 	if count > 0 {
-		return fmt.Errorf("user with owner %s already exists", user.Owner)
+		return fmt.Errorf("This token already exists in the system")
 	}
 
 	_, err = service.Collection.InsertOne(ctx, user)
 	return err
 }
 
-func (service *UserService) UnregisterUser(owner string) error {
+func (service *UserService) UnregisterUser(token string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
 	defer cancel()
 
-	count, err := service.Collection.CountDocuments(ctx, bson.M{"_id": owner})
+	count, err := service.Collection.CountDocuments(ctx, bson.M{"_id": token})
 	if err != nil {
 		return err
 	}
 	
 	if count <= 0 {
-		return fmt.Errorf("user with owner %s does not exists", owner)
+		return fmt.Errorf("user with token %s does not exists", token)
 	}
 
-	_, err = service.Collection.DeleteOne(ctx, bson.M{"_id": owner})
+	_, err = service.Collection.DeleteOne(ctx, bson.M{"_id": token})
 	return err
 }

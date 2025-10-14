@@ -18,7 +18,7 @@
    System architecture
 </h1>
 
-![SystemDesign](https://raw.githubusercontent.com/IdanKoblik/assets/refs/heads/main/whisper.png)
+![SystemDesign](assets/arch.png)
 
 ## API Reference
 

@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"encoding/json"
 	"time"
 	"whisper-api/db"
 	"whisper-api/services"
@@ -87,7 +88,11 @@ func TestRegisterEndpoint_Handle(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		err := collection.FindOne(ctx, map[string]string{"_id": w.Body.String()}).Decode(&user)
+		var resp RegisterResponse
+		err := json.Unmarshal(w.Body.Bytes(), &resp)
+		assert.NoError(t, err)
+
+		err = collection.FindOne(ctx, map[string]string{"_id": resp.Token}).Decode(&user)
 		assert.NoError(t, err)
 		assert.Equal(t, testPhone, user.Owner)
 		assert.Equal(t, "test", user.Subject)

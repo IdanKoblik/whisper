@@ -18,4 +18,54 @@
    System architecture
 </h1>
 
-![SystemDesign](https://raw.githubusercontent.com/IdanKoblik/assets/refs/heads/main/whisper.png)
+![SystemDesign](assets/arch.png)
+
+## API Reference
+
+#### Ping the server
+
+Returns "pong"
+
+```http
+GET /ping
+```
+
+
+**Responses:**
+
+| HTTP Code | Description |
+| --------- | ----------- |
+| 200       | pong        |
+<br>
+
+#### Register a new user
+
+Requires X-Admin-Token header and RawUser JSON body
+
+```http
+POST /register
+```
+
+
+**Header Parameters:**
+
+| Parameter       | Type     | Description               |
+| --------------- | -------- | ------------------------- |
+| `X-Admin-Token` | `string` | **Required**. Admin Token |
+
+**Body Parameters:**
+
+| Parameter     | Type            | Description |
+| ------------- | --------------- | ----------- |
+| `owner`       | `string`        |             |
+| `subject`     | `string`        |             |
+| `subscribers` | `array[string]` |             |
+
+**Responses:**
+
+| HTTP Code | Description   |
+| --------- | ------------- |
+| 200       | JWT Token     |
+| 400       | Invalid input |
+| 401       | Unauthorized  |
+<br>

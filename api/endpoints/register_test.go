@@ -3,13 +3,14 @@ package endpoints
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
-	"encoding/json"
 	"time"
 	"whisper-api/db"
+	"whisper-api/mock"
 	"whisper-api/services"
 
 	"github.com/stretchr/testify/assert"
@@ -28,17 +29,15 @@ func cleanupUser(t *testing.T, coll *mongo.Collection, owner string) {
 }
 
 func TestRegisterEndpoint_Handle(t *testing.T) {
-	os.Setenv("WHISPER_ADMIN_TOKEN", "admin123")
-	os.Setenv("WHISPER_DB", "whisper_test") 
-
-	client, err := db.MongoConnection()
+	cfg := mock.ConfigMock(t)
+	client, err := db.MongoConnection(&cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	collection := client.Database(os.Getenv("WHISPER_DB")).Collection("users")
+	collection := client.Database(cfg.Mongo.Database).Collection("users")
 	cleanupUser(t, collection, testPhone)
-	router := SetupRouter()
+	router := SetupRouter(&cfg)
 
 	t.Run("Invalid body", func(t *testing.T) {
 		body := `{}`

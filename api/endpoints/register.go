@@ -1,13 +1,13 @@
 package endpoints
 
 import (
-	"fmt"
-	"os"
-	"regexp"
-	"time"
-	"whisper-api/services"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
+	"regexp"
+	"time"
+	"whisper-api/config"
+	"whisper-api/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -15,7 +15,8 @@ import (
 )
 
 type RegisterEndpoint struct {
-	service *services.UserService	
+	service *services.UserService
+	cfg *config.Config
 }
 
 type RegisterResponse struct {
@@ -39,7 +40,7 @@ const PATTERN = `^\+\d{1,3} \d{7,12}$`
 // @Router /register [post]
 func (endpoint RegisterEndpoint) Handle(c *gin.Context) {
 	adminToken := c.GetHeader("X-Admin-Token")
-	if adminToken != os.Getenv("WHISPER_ADMIN_TOKEN") {
+	if adminToken != endpoint.cfg.AdminToken {
 		c.String(401, "Unauthorized: invalid admin token")
 		return
 	}

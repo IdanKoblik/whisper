@@ -1,24 +1,25 @@
 package db
 
 import (
-	"os"
 	"testing"
+	"whisper-api/mock"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMongoConnection_Success(t *testing.T) {
-	os.Setenv("MONGO_CONNECTION", "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=test")
+	cfg := mock.ConfigMock(t)
 
-	client, err := MongoConnection()
+	client, err := MongoConnection(&cfg)
 	assert.NoError(t, err, "expected no error connecting to MongoDB")
 	assert.NotNil(t, client, "expected a non-nil Mongo client")
 }
 
 func TestMongoConnection_Failure(t *testing.T) {
-	os.Setenv("MONGO_CONNECTION", "mongodb://invalidhost:27017")
+	cfg := mock.ConfigMock(t)
+	cfg.Mongo.ConnectionURL = "mongodb://invalidhost:27017"
 
-	client, err := MongoConnection()
+	client, err := MongoConnection(&cfg)
 	assert.Error(t, err, "expected error with invalid URI")
 	assert.Nil(t, client, "expected nil client on failure")
 }

@@ -88,7 +88,7 @@ func (endpoint RegisterEndpoint) Handle(c *gin.Context) {
 	}
 
 	response := RegisterResponse {
-		Token: user.Token,
+		Token: signedToken,
 		Key: hex.EncodeToString(identifier[:]),
 	}
 

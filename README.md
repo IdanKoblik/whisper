@@ -4,7 +4,6 @@
 
 <div align="center">
     <img alt="GitHub License" src="https://img.shields.io/github/license/IdanKoblik/whisper">
-    <img alt="Sonar" src="https://sonarcloud.io/api/project_badges/measure?project=IdanKoblik_whisper&metric=security_rating&token=80a1e7fdd01c76f58138be77745de3116285aa66">
 </div>
 
 <br>

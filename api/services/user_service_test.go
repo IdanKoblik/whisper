@@ -2,11 +2,12 @@ package services
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 	"whisper-api/db"
 	"whisper-api/mock"
+   "crypto/sha256"
+   "encoding/hex"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -24,7 +25,7 @@ func TestRegisterAndUnregisterUser(t *testing.T) {
            t.Fatal(err)
    }
 
-   collection := client.Database(os.Getenv("WHISPER_DB")).Collection("users")
+   collection := client.Database(cfg.Mongo.Database).Collection("users")
 	service := &UserService{Collection: collection}
 
 	user := &User{
@@ -36,7 +37,10 @@ func TestRegisterAndUnregisterUser(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
    defer cancel()
-   _, err = collection.DeleteOne(ctx, map[string]string{"_id": user.Token})
+
+	tokenHash := sha256.Sum256([]byte(user.Token))
+   tokenStr := hex.EncodeToString(tokenHash[:])
+   _, err = collection.DeleteOne(ctx, map[string]string{"_id": tokenStr})
    if err != nil {
       t.Fatalf("failed to cleanup user %s: %v", user.Owner, err)
    }
@@ -54,7 +58,7 @@ func TestRegisterAndUnregisterUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, int64(1), count)
 
-	err = service.UnregisterUser(user.Token)
+	err = service.UnregisterUser(tokenStr)
 	assert.NoError(t, err)
 
 	err = service.UnregisterUser(user.Token)

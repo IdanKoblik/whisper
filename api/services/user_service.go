@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 	"fmt"
+	"crypto/sha256"
+	"encoding/hex"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -32,6 +34,8 @@ func (service *UserService) RegisterUser(user *User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
 	defer cancel()
 
+	tokenHash := sha256.Sum256([]byte(user.Token))
+	user.Token = hex.EncodeToString(tokenHash[:])
 	count, err := service.Collection.CountDocuments(ctx, bson.M{"_id": user.Token})
 	if err != nil {
 		return err
@@ -49,7 +53,9 @@ func (service *UserService) UnregisterUser(token string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
 	defer cancel()
 
-	count, err := service.Collection.CountDocuments(ctx, bson.M{"_id": token})
+	tokenHash := sha256.Sum256([]byte(token))
+	tokenStr := hex.EncodeToString(tokenHash[:])
+	count, err := service.Collection.CountDocuments(ctx, bson.M{"_id": tokenStr})
 	if err != nil {
 		return err
 	}
@@ -58,6 +64,6 @@ func (service *UserService) UnregisterUser(token string) error {
 		return fmt.Errorf("user with token %s does not exists", token)
 	}
 
-	_, err = service.Collection.DeleteOne(ctx, bson.M{"_id": token})
+	_, err = service.Collection.DeleteOne(ctx, bson.M{"_id": tokenStr})
 	return err
 }

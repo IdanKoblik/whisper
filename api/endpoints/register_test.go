@@ -8,6 +8,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"crypto/sha256"
+   "encoding/hex"
 	"time"
 	"whisper-api/db"
 	"whisper-api/mock"
@@ -91,7 +93,9 @@ func TestRegisterEndpoint_Handle(t *testing.T) {
 		err := json.Unmarshal(w.Body.Bytes(), &resp)
 		assert.NoError(t, err)
 
-		err = collection.FindOne(ctx, map[string]string{"_id": resp.Token}).Decode(&user)
+		tokenHash := sha256.Sum256([]byte(resp.Token))
+      tokenStr := hex.EncodeToString(tokenHash[:])
+		err = collection.FindOne(ctx, map[string]string{"_id": tokenStr}).Decode(&user)
 		assert.NoError(t, err)
 		assert.Equal(t, testPhone, user.Owner)
 		assert.Equal(t, "test", user.Subject)

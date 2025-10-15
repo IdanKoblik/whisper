@@ -1,3 +1,5 @@
+.idae/
+
 *.iml
 .gradle
 /local.properties

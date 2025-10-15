@@ -2,14 +2,15 @@ package endpoints
 
 import (
 	"testing"
-	"os"
+	"whisper-api/mock"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRouterInvalidMongo(t *testing.T) {
-	os.Setenv("MONGO_CONNECTION", "mongodb://invalidhost:27017")
+	cfg := mock.ConfigMock(t)
+	cfg.Mongo.ConnectionURL = "mongodb://invalidhost:27017"
 
-	router := SetupRouter()
+	router := SetupRouter(&cfg)
 	assert.Nil(t, router)
 }

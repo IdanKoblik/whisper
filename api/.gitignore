@@ -3,6 +3,7 @@
 #
 # Local
 docs/
+localdev/
 
 # Binaries for programs and plugins
 *.exe

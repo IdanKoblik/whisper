@@ -1,7 +1,7 @@
 package endpoints
 
 import (
-	"os"
+	"whisper-api/config"
 	"whisper-api/services"
 
 	"github.com/gin-gonic/gin"
@@ -9,6 +9,7 @@ import (
 
 type UnregisterEndpoint struct{
 	service *services.UserService	
+	cfg *config.Config
 }
 
 // UnregisterEndpoint godoc
@@ -24,7 +25,7 @@ type UnregisterEndpoint struct{
 // @Router /unregister/{token} [delete]
 func (endpoint UnregisterEndpoint) Handle(c *gin.Context) {
 	adminToken := c.GetHeader("X-Admin-Token")
-	if adminToken != os.Getenv("WHISPER_ADMIN_TOKEN") {
+	if adminToken != endpoint.cfg.AdminToken {
 		c.String(401, "Unauthorized: invalid admin token")
 		return
 	}

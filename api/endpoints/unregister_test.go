@@ -7,16 +7,15 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"whisper-api/mock"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUnregisterUser(t *testing.T) {
-	os.Setenv("MONGO_CONNECTION", "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.5.3")
-	os.Setenv("WHISPER_ADMIN_TOKEN", "admin123")
-  	os.Setenv("WHISPER_DB", "whisper_test")
-
-  	router := SetupRouter()
+	cfg := mock.ConfigMock(t)
+  
+	router := SetupRouter(&cfg)
 	t.Run("Non exisiting user", func(t *testing.T) {
 		req := httptest.NewRequest("DELETE", "/unregister/404", bytes.NewBufferString(""))
       req.Header.Set("X-Admin-Token", "admin123")

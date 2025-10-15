@@ -4,12 +4,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"whisper-api/mock"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPingEndpoint(t *testing.T) {
-	router := SetupRouter()
+	cfg := mock.ConfigMock(t)
+	router := SetupRouter(&cfg)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/ping", nil)

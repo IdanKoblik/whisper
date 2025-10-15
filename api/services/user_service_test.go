@@ -2,10 +2,11 @@ package services
 
 import (
 	"context"
-	"testing"
 	"os"
+	"testing"
 	"time"
 	"whisper-api/db"
+	"whisper-api/mock"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -16,10 +17,9 @@ const TEST_COLLECTION = "users"
 
 
 func TestRegisterAndUnregisterUser(t *testing.T) {
-	os.Setenv("MONGO_CONNECTION", "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.5.3")
-   os.Setenv("WHISPER_DB", "whisper")
+	cfg := mock.ConfigMock(t)		
 
-   client, err := db.MongoConnection()
+	client, err := db.MongoConnection(&cfg)
    if err != nil {
            t.Fatal(err)
    }

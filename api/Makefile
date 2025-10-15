@@ -3,8 +3,7 @@ COVERAGE_FILE=coverage.out
 
 .PHONY: test coverage coverage.html clean build
 
-# List all packages except docs
-PKGS=$(shell go list ./... | grep -v '/docs')
+PKGS=$(shell go list ./... | grep -v '/docs' | grep -v '/mock' )
 
 test:
 	@echo "Running tests with coverage (excluding docs)..."

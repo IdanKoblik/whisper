@@ -1,30 +1,17 @@
 package endpoints
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
-	"regexp"
-	"time"
 	"whisper-api/config"
 	"whisper-api/services"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 )
 
 type RegisterEndpoint struct {
 	service *services.UserService
 	cfg *config.Config
 }
-
-type RegisterResponse struct {
-	Token string `json:"token"`
-	Key string `json:"key"` 
-}
-
-const PATTERN = `^\+\d{1,3} \d{7,12}$`
 
 // RegisterEndpoint godoc
 // @Summary Register a new user
@@ -45,52 +32,12 @@ func (endpoint RegisterEndpoint) Handle(c *gin.Context) {
 		return
 	}
 
-	var rawUser services.RawUser 
-	err := c.ShouldBindBodyWithJSON(&rawUser)
+	data, err := endpoint.service.RegisterUser()	
 	if err != nil {
+		fmt.Println(err.Error())
 		c.String(400, err.Error())
 		return
 	}
 
-	re := regexp.MustCompile(PATTERN)
-	if !re.MatchString(rawUser.Owner) {
-		c.String(400, "Invalid phone number")
-		return
-	}
-
-	jwtData := jwt.MapClaims {
-		"owner": rawUser.Owner,
-		"subject": rawUser.Subject,
-		"subscribers": rawUser.Subscribers,
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtData)
-	rawID := fmt.Sprintf("%s-%s", uuid.New(), time.Now().String())
-	identifier := sha256.Sum256([]byte(rawID))
-	
-	signedToken, err := token.SignedString(identifier[:])
-	if err != nil {
-		c.String(400, err.Error())
-		return
-	}
-
-	user := services.User {
-		Owner: rawUser.Owner,
-		Token: signedToken, 
-		Subject: rawUser.Subject,
-		Subscribers: rawUser.Subscribers,
-	}
-
-	err = endpoint.service.RegisterUser(&user)	
-	if err != nil {
-		c.String(400, err.Error())
-		return
-	}
-
-	response := RegisterResponse {
-		Token: signedToken,
-		Key: hex.EncodeToString(identifier[:]),
-	}
-
-	c.JSON(200, response)
+	c.String(200, data.ApiToken)
 }

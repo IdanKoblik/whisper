@@ -13,6 +13,6 @@ func main() {
 		return
 	}
 
-	router := endpoints.SetupRouter(&cfg)	
+	router := endpoints.SetupRouter(&cfg)
 	router.Run(cfg.Addr)
 }

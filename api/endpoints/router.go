@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"fmt"
+	"whisper-api/communication"
 	"whisper-api/config"
 	"whisper-api/db"
 	"whisper-api/services"
@@ -22,9 +23,14 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 		return nil
 	}
 
+	redis := db.RedisConnection(cfg)
+
 	collection := client.Database(cfg.Mongo.Database).Collection("users")
 	userService := services.UserService{collection}
+	com := communication.Communication{redis}
 
+	router.GET("/ws", com.HandleWebsocket)
+	router.POST("/send", SendEndpoint{&com}.Handle)
 	router.GET("/ping", PingEndpoint{}.Handle)
 	router.POST("/register", RegisterEndpoint{&userService, cfg}.Handle)
 	router.DELETE("/unregister/:token", UnregisterEndpoint{&userService, cfg}.Handle)

@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "me.idank.whisper"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -42,6 +42,8 @@ android {
 }
 
 dependencies {
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.0")
+    implementation(libs.okhttp)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

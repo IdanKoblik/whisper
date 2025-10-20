@@ -3,13 +3,14 @@ package endpoints
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
-	"crypto/sha256"
-   "encoding/hex"
 	"time"
 	"whisper-api/db"
 	"whisper-api/mock"
@@ -76,13 +77,14 @@ func TestRegisterEndpoint_Handle(t *testing.T) {
 	t.Run("Successful registration", func(t *testing.T) {
 		os.Setenv("WHISPER_KEY", "testkey123")
 
-		body := `{"owner":"` + testPhone + `","subject":"test","subscribers":["a","b"]}`
+		body := `{"owner":"` + testPhone + `"}`
 		req := httptest.NewRequest("POST", "/register", bytes.NewBufferString(body))
-		req.Header.Set("X-Admin-Token", "admin123")
+		req.Header.Set("X-Admin-Token", cfg.AdminToken)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
+		fmt.Println(w.Body.String())
 		assert.NotEmpty(t, w.Body.String())
 
 		var user services.User
@@ -98,8 +100,6 @@ func TestRegisterEndpoint_Handle(t *testing.T) {
 		err = collection.FindOne(ctx, map[string]string{"_id": tokenStr}).Decode(&user)
 		assert.NoError(t, err)
 		assert.Equal(t, testPhone, user.Owner)
-		assert.Equal(t, "test", user.Subject)
-		assert.ElementsMatch(t, []string{"a", "b"}, user.Subscribers)
 
 		cleanupUser(t, collection, user.Owner)
 	})

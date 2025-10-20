@@ -8,7 +8,7 @@ import (
 )
 
 type Config struct {
-	Addr string `yaml:"uri"`
+	Addr string `yaml:"addr"`
 	AdminToken string `yaml:"adminToken"`
 	Redis RedisConfig `yaml:"redis"`
 	Mongo MongoConfig `yaml:"mongo"`

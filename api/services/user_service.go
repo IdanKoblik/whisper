@@ -2,26 +2,18 @@ package services
 
 import (
 	"context"
-	"time"
-	"fmt"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
+	"time"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-type RawUser struct {
-	Owner string `json:"owner"`
-	Subject string `json:"subject"`
-	Subscribers []string `json:"subscribers,omitempty"`
-}
-
-type User struct {
-	Token string `bson:"_id" json:"id"`
-	Owner string `bson:"owner" json:"owner"`
-	Subject string `bson:"subject" json:"subject"`
-	Subscribers []string `bson:"subscribers" json:"subscribers"`
+type Data struct {
+	ApiToken string `bson:"_id" json:"id"`
 }
 
 type UserService struct {
@@ -30,23 +22,31 @@ type UserService struct {
 
 const TIMEOUT = 5 * time.Second
 
-func (service *UserService) RegisterUser(user *User) error {
+func (service *UserService) RegisterUser() (Data ,error) {
 	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
 	defer cancel()
 
-	tokenHash := sha256.Sum256([]byte(user.Token))
-	user.Token = hex.EncodeToString(tokenHash[:])
-	count, err := service.Collection.CountDocuments(ctx, bson.M{"_id": user.Token})
+	rawID := fmt.Sprintf("%s-%s", uuid.New(), time.Now().String())
+	identifier := sha256.Sum256([]byte(rawID))
+
+	apiToken := hex.EncodeToString(identifier[:])
+
+	var data Data
+	count, err := service.Collection.CountDocuments(ctx, bson.M{"_id": apiToken})
 	if err != nil {
-		return err
-	}
-	
-	if count > 0 {
-		return fmt.Errorf("This token already exists in the system")
+		return data, err
 	}
 
-	_, err = service.Collection.InsertOne(ctx, user)
-	return err
+	if count > 0 {
+		return data, fmt.Errorf("This token already exists in the system")
+	}
+
+	data = Data {
+		ApiToken: apiToken,
+	}
+
+	_, err = service.Collection.InsertOne(ctx, data)
+	return data, err
 }
 
 func (service *UserService) UnregisterUser(token string) error {
@@ -59,9 +59,9 @@ func (service *UserService) UnregisterUser(token string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if count <= 0 {
-		return fmt.Errorf("user with token %s does not exists", token)
+		return fmt.Errorf("document with token %s does not exists", token)
 	}
 
 	_, err = service.Collection.DeleteOne(ctx, bson.M{"_id": tokenStr})

@@ -28,11 +28,9 @@ func TestRegisterAndUnregisterUser(t *testing.T) {
    collection := client.Database(cfg.Mongo.Database).Collection("users")
 	service := &UserService{Collection: collection}
 
-	user := &User{
-		Owner:       "owner1",
-		Token:       "token123",
-		Subject:     "subject1",
-		Subscribers: []string{"sub1", "sub2"},
+	user := User{
+		Owner: "owner1",
+		Token: "token123",
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -58,7 +56,7 @@ func TestRegisterAndUnregisterUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, int64(1), count)
 
-	err = service.UnregisterUser(tokenStr)
+	err = service.UnregisterUser(user.Token)
 	assert.NoError(t, err)
 
 	err = service.UnregisterUser(user.Token)

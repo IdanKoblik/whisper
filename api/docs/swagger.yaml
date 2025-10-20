@@ -1,0 +1,96 @@
+definitions:
+  services.RawUser:
+    properties:
+      owner:
+        type: string
+      subject:
+        type: string
+      subscribers:
+        items:
+          type: string
+        type: array
+    type: object
+info:
+  contact: {}
+paths:
+  /ping:
+    get:
+      description: Returns "pong"
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: pong
+          schema:
+            type: string
+      summary: Ping the server
+      tags:
+      - Health
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Requires X-Admin-Token header and RawUser JSON body
+      parameters:
+      - description: Admin Token
+        in: header
+        name: X-Admin-Token
+        required: true
+        type: string
+      - description: User data
+        in: body
+        name: rawUser
+        required: true
+        schema:
+          $ref: '#/definitions/services.RawUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT Token
+          schema:
+            type: string
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      summary: Register a new user
+      tags:
+      - Users
+  /unregister/{token}:
+    delete:
+      description: Requires X-Admin-Token header and user token as a URL parameter
+      parameters:
+      - description: Admin Token
+        in: header
+        name: X-Admin-Token
+        required: true
+        type: string
+      - description: User JWT Token
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Successfully removed token
+          schema:
+            type: string
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      summary: Unregister an existing user
+      tags:
+      - Users
+swagger: "2.0"

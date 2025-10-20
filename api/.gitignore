@@ -2,7 +2,6 @@
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
 # Local
-docs/
 localdev/
 
 # Binaries for programs and plugins

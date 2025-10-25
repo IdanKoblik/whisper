@@ -1,2 +1,6 @@
 # Local
 localdev/
+/android/.gradle/
+/android/.idea/
+/android/build/
+/.gradle/

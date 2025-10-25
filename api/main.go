@@ -1,11 +1,9 @@
 package main
 
 import (
-	"context"
 	"whisper-api/config"
+	"whisper-api/endpoints"
 )
-
-var ctx = context.Background()
 
 func main() {
 	cfg, err := config.GetConfig()
@@ -13,7 +11,7 @@ func main() {
 		panic(err)
 	}
 
-	router := SetupRouter(cfg)
+	router := endpoints.SetupRouter(cfg)
 	err = router.Run(cfg.Addr)
 	if err != nil {
 		panic(err)

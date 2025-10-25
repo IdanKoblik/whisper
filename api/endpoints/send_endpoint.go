@@ -2,14 +2,12 @@ package endpoints
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"whisper-api/config"
 	"whisper-api/db"
 	"whisper-api/services"
 
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 )
 
 var ctx = context.Background()
@@ -29,15 +27,14 @@ var ctx = context.Background()
 // @Router       /api/send [post]
 func SendMessage(cfg *config.Config, c *gin.Context) {
 	apiToken := c.GetHeader("X-Api-Token")
-	client := db.RedisConnection(cfg)
-	_, err := client.Get(ctx, apiToken).Result()
-	if errors.Is(err, redis.Nil) {
-		c.String(401, "Unauthorized")
+	found, err := db.DoesExists(cfg, services.HashToken(apiToken), "")
+	if err != nil {
+		c.String(400, err.Error())
 		return
 	}
 
-	if err != nil {
-		c.String(400, err.Error())
+	if !found {
+		c.String(401, "Unauthorized")
 		return
 	}
 

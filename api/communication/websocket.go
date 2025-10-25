@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
 	"whisper-api/config"
 	"whisper-api/db"
 
@@ -15,49 +16,58 @@ type ConnectRequest struct {
 	DeviceID string `json:"device_id"`
 }
 
-// TODO duration
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
+type Conn interface {
+	WriteJSON(v interface{}) error
 }
 
-var Clients = make(map[string]*websocket.Conn)
+var (
+	Clients      = make(map[string]Conn)
+	clientsMutex = &sync.Mutex{}
+	upgrader     = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool { return true },
+	}
+)
 
 func HandleWebsocket(cfg *config.Config, c *gin.Context) {
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
+	apiToken := c.GetHeader("X-Api-Token")
+	if apiToken == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "missing API token"})
 		return
 	}
 
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		fmt.Printf("Upgrade error: %v\n", err)
+		return
+	}
 	defer conn.Close()
+
 	for {
-		apiToken := c.GetHeader("X-Api-Token")
 		_, data, err := conn.ReadMessage()
+		if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+			break
+		}
 		if err != nil {
-			continue // TODO handle
+			fmt.Printf("Read error: %v\n", err)
+			break
 		}
 
 		var request ConnectRequest
-		err = json.Unmarshal(data, &request)
-		if err != nil {
-			continue // TODO handle
+		if err := json.Unmarshal(data, &request); err != nil {
+			fmt.Printf("Unmarshal error: %v\n", err)
+			continue
 		}
 
 		found, err := db.DoesExists(cfg, apiToken, request.DeviceID)
-		if err != nil {
-			continue // TODO handle
+		if err != nil || !found {
+			fmt.Printf("Device validation failed for %s\n", request.DeviceID)
+			continue
 		}
 
-		if !found {
-			continue // TODO handle
-		}
-
+		clientsMutex.Lock()
 		Clients[request.DeviceID] = conn
-		fmt.Printf("\nNew device: %s\n", request.DeviceID)
-		conn.WriteJSON(gin.H{
-			"status":  "ok",
-			"message": "device registered successfully",
-		})
+		clientsMutex.Unlock()
+
+		fmt.Printf("New device connected: %s\n", request.DeviceID)
 	}
 }

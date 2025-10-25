@@ -15,8 +15,8 @@ import me.idank.whisper.services.WebSocketService
 @Composable
 fun HomeScreen(apiToken: String, deviceId: String, onLogout: () -> Unit) {
     val context = LocalContext.current
-    var wsUrl by remember { mutableStateOf("") }
-    var serviceActive by remember { mutableStateOf(false) }
+    var wsUrl by remember { mutableStateOf("ws://10.5.0.84:8080/ws") }
+    var serviceActive by remember { mutableStateOf(true) }
     var showKey by remember { mutableStateOf(false) }
 
     Scaffold(

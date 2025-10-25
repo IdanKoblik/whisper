@@ -40,9 +40,11 @@ func DoesExists(cfg *config.Config, key string, fallback string) (bool, error) {
 			return false, fmt.Errorf("this api token does not exists")
 		}
 
-		err = client.Set(ctx, key, fallback, 0).Err()
-		if err != nil {
-			return false, err
+		if fallback != "" {
+			err = client.Set(ctx, key, fallback, 0).Err()
+			if err != nil {
+				return false, err
+			}
 		}
 
 		return true, nil

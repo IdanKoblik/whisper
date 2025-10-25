@@ -20,34 +20,29 @@ type RegisterResponse struct {
 }
 
 func RegisterUser(cfg *config.Config) (RegisterResponse, error) {
-	rawID := fmt.Sprintf("%s-%s", uuid.New(), time.Now().String())
-	identifier := sha256.Sum256([]byte(rawID))
+	rawToken := fmt.Sprintf("%s-%s", uuid.New(), time.Now().String())
+	hash := sha256.Sum256([]byte(rawToken))
+	token := hex.EncodeToString(hash[:])
 
-	apiToken := hex.EncodeToString(identifier[:])
 	data := User{
-		ApiToken: apiToken,
+		ApiToken: HashToken(token),
 	}
 
 	var response RegisterResponse
-	err := db.InsertData(cfg, data, apiToken)
+	err := db.InsertData(cfg, data, data.ApiToken)
 	if err != nil {
 		return response, err
 	}
 
-	response = RegisterResponse{ApiToken: apiToken}
+	response = RegisterResponse{ApiToken: token}
 	return response, nil
 }
 
-func RemoveUser(cfg *config.Config, apiToken string) error {
-	rawID := fmt.Sprintf("%s-%s", uuid.New(), time.Now().String())
-	identifier := sha256.Sum256([]byte(rawID))
+func RemoveUser(cfg *config.Config, rawToken string) error {
+	return db.DeleteData(cfg, HashToken(rawToken))
+}
 
-	hashedApiToken := hex.EncodeToString(identifier[:])
-	err := db.DeleteData(cfg, hashedApiToken)
-	if err != nil {
-		return err
-	}
-
-	err = db.DeleteData(cfg, apiToken)
-	return err
+func HashToken(rawToken string) string {
+	hash := sha256.Sum256([]byte(rawToken))
+	return hex.EncodeToString(hash[:])
 }

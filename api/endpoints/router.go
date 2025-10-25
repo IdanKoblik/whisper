@@ -1,11 +1,9 @@
-package main
+package endpoints
 
 import (
 	"whisper-api/communication"
 	"whisper-api/config"
 	_ "whisper-api/docs"
-	"whisper-api/endpoints"
-	"whisper-api/endpoints/admin"
 
 	"github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -21,21 +19,21 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 
 	api := router.Group("/api")
 	{
-		api.GET("/ping", endpoints.PingEndpoint)
+		api.GET("/ping", PingEndpoint)
 
 		api.POST("/send", func(c *gin.Context) {
-			endpoints.SendMessage(cfg, c)
+			SendMessage(cfg, c)
 		})
 	}
 
 	adminAPI := api.Group("/admin")
 	{
 		adminAPI.POST("/register", func(c *gin.Context) {
-			admin.RegisterUser(cfg, c)
+			RegisterUser(cfg, c)
 		})
 
-		adminAPI.DELETE("/unregister/:token", func(c *gin.Context) {
-			admin.UnRegisterUser(cfg, c)
+		adminAPI.DELETE("/unregister/:ApiToken", func(c *gin.Context) {
+			UnRegisterUser(cfg, c)
 		})
 	}
 

@@ -11,7 +11,7 @@ fun AppRoot() {
     val context = LocalContext.current
 
     var apiToken by remember {
-        mutableStateOf(context.getSavedLogin() ?: "")
+        mutableStateOf(context.getSavedLogin() ?: "68263e6587aded201b805762bfecd18aec608515d08a05f813be7259e9eb35fd")
     }
     var isLoggedIn by remember {
         mutableStateOf(apiToken.isNotBlank())
@@ -28,7 +28,7 @@ fun AppRoot() {
         }
     } else {
         HomeScreen(apiToken, deviceId) {
-            apiToken = ""
+            apiToken = "68263e6587aded201b805762bfecd18aec608515d08a05f813be7259e9eb35fd"
             isLoggedIn = false
             context.clearLogin()
         }

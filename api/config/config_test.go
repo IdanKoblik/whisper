@@ -14,9 +14,9 @@ func TestReadConfig_Success(t *testing.T) {
 
 	yamlContent := `
 addr: "localhost:8080"
-adminToken: "secret123"
+admin_token: "secret123"
 mongo:
-  connectionURL: "mongodb://localhost:27017"
+  connection_string: "mongodb://localhost:27017"
   database: "testdb"
 redis:
   addr: "localhost:6379"

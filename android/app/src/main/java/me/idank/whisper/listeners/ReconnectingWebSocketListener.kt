@@ -2,7 +2,7 @@ package me.idank.whisper.listeners
 
 import android.content.Context
 import android.util.Log
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -21,7 +21,7 @@ class ReconnectingWebSocketListener(
     private val manager: WebSocketManager
 ) : WebSocketListener() {
 
-    private val mapper: ObjectMapper = ObjectMapper()
+    private val mapper = jacksonObjectMapper()
     private val scope = CoroutineScope(Dispatchers.IO)
     private var reconnectJob: Job? = null
 
@@ -36,17 +36,20 @@ class ReconnectingWebSocketListener(
 
     override fun onMessage(webSocket: WebSocket, text: String) {
         Log.d("WebSocket", "Message received: $text")
+
         try {
             val message = mapper.readValue(text, MessageRequest::class.java)
-            Log.d("WebSocket", "Parsed message: $message")
+            Log.d("WebSocket", "Parsed MessageRequest: $message")
 
             message.subscribers.forEach {
                 context.sendSms(it, message.message)
             }
+
         } catch (e: Exception) {
-            Log.e("WebSocket", "Failed to parse message: ${e.message}")
+            Log.w("WebSocket", "Ignored non-MessageRequest: $text")
         }
     }
+
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
         Log.d("WebSocket", "Closed: $reason")

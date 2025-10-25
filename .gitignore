@@ -4,3 +4,6 @@ localdev/
 /android/.idea/
 /android/build/
 /.gradle/
+/android/.kotlin/
+/android/app/.idea/
+/android/app/.gradle/

@@ -1,0 +1,129 @@
+definitions:
+  services.MessageRequest:
+    properties:
+      device_id:
+        type: string
+      message:
+        type: string
+      subscribers:
+        items:
+          type: string
+        type: array
+    type: object
+info:
+  contact: {}
+paths:
+  /api/admin/register:
+    post:
+      consumes:
+      - application/json
+      description: Allows an admin to create a new API user and receive an API token
+      parameters:
+      - description: Admin token
+        in: header
+        name: X-Admin-Token
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: API token for the new user
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: 'Unauthorized: Invalid admin token'
+          schema:
+            type: string
+      summary: Register a new API user
+      tags:
+      - Admin
+  /api/admin/unregister/{ApiToken}:
+    delete:
+      description: Allows an admin to delete a user by API token
+      parameters:
+      - description: Admin token
+        in: header
+        name: X-Admin-Token
+        required: true
+        type: string
+      - description: User API token to remove
+        in: path
+        name: ApiToken
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Deleted {ApiToken}
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: 'Unauthorized: Invalid admin token'
+          schema:
+            type: string
+      summary: Unregister a user
+      tags:
+      - Admin
+  /api/message:
+    post:
+      consumes:
+      - application/json
+      description: Sends a message through the API using the user's token
+      parameters:
+      - description: User API token
+        in: header
+        name: X-Api-Token
+        required: true
+        type: string
+      - description: Message request payload
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/services.MessageRequest'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Message sent
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "429":
+          description: Rate limit exceeded
+          schema:
+            type: string
+      summary: Send a message
+      tags:
+      - Messages
+  /api/ping:
+    get:
+      description: Simple health check endpoint
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: pong
+          schema:
+            type: string
+      summary: Ping the server
+      tags:
+      - Health
+swagger: "2.0"

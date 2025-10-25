@@ -8,46 +8,40 @@ import (
 )
 
 type Config struct {
-	Addr string `yaml:"uri"`
-	AdminToken string `yaml:"adminToken"`
+	Addr       string `yaml:"addr"`
+	AdminToken string `yaml:"admin_token"`
+	RateLimit  *int    `yaml:"rate_limit"`
+
 	Redis RedisConfig `yaml:"redis"`
 	Mongo MongoConfig `yaml:"mongo"`
 }
 
 type RedisConfig struct {
-	Addr string `yaml:"addr"`
+	Addr     string `yaml:"addr"`
 	Password string `yaml:"password"`
-	DB int `yaml:"db"` 
+	DB       int    `yaml:"db"`
 }
 
 type MongoConfig struct {
-	ConnectionURL string `yaml:"connectionURL"`
-	Database string `yaml:"database"`
+	ConnectionString string `yaml:"connection_string"`
+	Database         string `yaml:"database"`
 }
 
-type Reader interface {
-	ReadConfig() (Config, error)
-}
-
-type ConfigReader struct{}
-
-func (ConfigReader) ReadConfig() (Config, error) {
+func GetConfig() (*Config, error) {
 	env := os.Getenv("APP_ENV")
 	configPath := os.Getenv("CONFIG_PATH")
 	cfgFile := fmt.Sprintf("%s/config.%s.yaml", configPath, env)
 
-	var cfg Config
 	data, err := os.ReadFile(cfgFile)
 	if err != nil {
-		return cfg, err
+		return nil, err
 	}
 
-	err = yaml.Unmarshal(data, &cfg) 
+	var cfg Config
+	err = yaml.Unmarshal(data, &cfg)
 	if err != nil {
-		return cfg, err
+		return nil, err
 	}
 
-	return cfg, nil
+	return &cfg, nil
 }
-
-

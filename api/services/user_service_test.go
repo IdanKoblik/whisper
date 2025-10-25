@@ -1,68 +1,48 @@
 package services
 
 import (
-	"context"
 	"testing"
-	"time"
 	"whisper-api/db"
 	"whisper-api/mock"
-   "crypto/sha256"
-   "encoding/hex"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-const TEST_DB = "whisper_test"
-const TEST_COLLECTION = "users"
+func TestRegisterUser(t *testing.T) {
+	cfg := mock.ConfigMock(t)
 
+	resp, err := RegisterUser(cfg)
+	assert.NoError(t, err, "RegisterUser should not return an error")
+	assert.NotEmpty(t, resp.ApiToken, "API token should not be empty")
 
-func TestRegisterAndUnregisterUser(t *testing.T) {
-	cfg := mock.ConfigMock(t)		
+	hash := HashToken(resp.ApiToken)
 
-	client, err := db.MongoConnection(&cfg)
-   if err != nil {
-           t.Fatal(err)
-   }
+	collection, err := db.MongoCollection(cfg)
+	assert.NoError(t, err, "MongoCollection should not return an error")
 
-   collection := client.Database(cfg.Mongo.Database).Collection("users")
-	service := &UserService{Collection: collection}
+	found, err := db.FindData(collection, hash)
+	assert.NoError(t, err, "FindData should not return an error")
+	assert.True(t, found, "User hash should exist in DB after registration")
 
-	user := &User{
-		Owner:       "owner1",
-		Token:       "token123",
-		Subject:     "subject1",
-		Subscribers: []string{"sub1", "sub2"},
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-   defer cancel()
-
-	tokenHash := sha256.Sum256([]byte(user.Token))
-   tokenStr := hex.EncodeToString(tokenHash[:])
-   _, err = collection.DeleteOne(ctx, map[string]string{"_id": tokenStr})
-   if err != nil {
-      t.Fatalf("failed to cleanup user %s: %v", user.Owner, err)
-   }
-
-	err = service.RegisterUser(user)
-	assert.NoError(t, err)
-
-	err = service.RegisterUser(user)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "already exists")
-
-	ctx, cancel = context.WithTimeout(context.Background(), TIMEOUT)
-	defer cancel()
-	count, err := collection.CountDocuments(ctx, bson.M{"_id": user.Token})
-	assert.NoError(t, err)
-	assert.Equal(t, int64(1), count)
-
-	err = service.UnregisterUser(tokenStr)
-	assert.NoError(t, err)
-
-	err = service.UnregisterUser(user.Token)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "does not exists")
+	err = db.DeleteData(cfg, hash)
+	assert.NoError(t, err, "DeleteData cleanup should not return an error")
 }
 
+func TestRemoveUser(t *testing.T) {
+	cfg := mock.ConfigMock(t)
+
+	resp, err := RegisterUser(cfg)
+	assert.NoError(t, err, "RegisterUser should not return an error")
+
+	err = RemoveUser(cfg, resp.ApiToken)
+	assert.NoError(t, err, "RemoveUser should not return an error")
+
+	hash := HashToken(resp.ApiToken)
+
+	collection, err := db.MongoCollection(cfg)
+	assert.NoError(t, err, "MongoCollection should not return an error")
+
+	found, err := db.FindData(collection, hash)
+	assert.NoError(t, err, "FindData should not return an error")
+	assert.False(t, found, "User hash should be deleted from DB")
+}

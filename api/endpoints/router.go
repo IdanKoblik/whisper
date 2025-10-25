@@ -1,35 +1,46 @@
 package endpoints
 
 import (
-	"fmt"
+	"whisper-api/communication"
 	"whisper-api/config"
-	"whisper-api/db"
-	"whisper-api/services"
-
-	"github.com/gin-gonic/gin"
-
 	_ "whisper-api/docs"
 
-	swaggerFiles "github.com/swaggo/files"
+	"github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter(cfg *config.Config) *gin.Engine {
 	router := gin.Default()
-	client, err := db.MongoConnection(cfg)	
-	if err != nil {
-		fmt.Println("Cannot connect to mongodb")
+	if cfg == nil {
 		return nil
 	}
 
-	collection := client.Database(cfg.Mongo.Database).Collection("users")
-	userService := services.UserService{collection}
+	api := router.Group("/api")
+	{
+		api.GET("/ping", PingEndpoint)
 
-	router.GET("/ping", PingEndpoint{}.Handle)
-	router.POST("/register", RegisterEndpoint{&userService, cfg}.Handle)
-	router.DELETE("/unregister/:token", UnregisterEndpoint{&userService, cfg}.Handle)
+		api.POST("/send", func(c *gin.Context) {
+			SendMessage(cfg, c)
+		})
+	}
+
+	adminAPI := api.Group("/admin")
+	{
+		adminAPI.POST("/register", func(c *gin.Context) {
+			RegisterUser(cfg, c)
+		})
+
+		adminAPI.DELETE("/unregister/:ApiToken", func(c *gin.Context) {
+			UnRegisterUser(cfg, c)
+		})
+	}
+
+	router.GET("/ws", func(c *gin.Context) {
+		communication.HandleWebsocket(cfg, c)
+	})
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
 	return router
 }

@@ -13,10 +13,10 @@ func TestReadConfig_Success(t *testing.T) {
 	cfgPath := filepath.Join(tmpDir, "config.dev.yaml")
 
 	yamlContent := `
-uri: "localhost:8080"
-adminToken: "secret123"
+addr: "localhost:8080"
+admin_token: "secret123"
 mongo:
-  connectionURL: "mongodb://localhost:27017"
+  connection_string: "mongodb://localhost:27017"
   database: "testdb"
 redis:
   addr: "localhost:6379"
@@ -30,13 +30,12 @@ redis:
 	os.Setenv("APP_ENV", "dev")
 	os.Setenv("CONFIG_PATH", tmpDir)
 
-	reader := ConfigReader{}
-	cfg, err := reader.ReadConfig()
+	cfg, err := GetConfig()
 
 	assert.NoError(t, err)
 	assert.Equal(t, "localhost:8080", cfg.Addr)
 	assert.Equal(t, "secret123", cfg.AdminToken)
-	assert.Equal(t, "mongodb://localhost:27017", cfg.Mongo.ConnectionURL)
+	assert.Equal(t, "mongodb://localhost:27017", cfg.Mongo.ConnectionString)
 	assert.Equal(t, "testdb", cfg.Mongo.Database)
 	assert.Equal(t, "localhost:6379", cfg.Redis.Addr)
 	assert.Equal(t, "", cfg.Redis.Password)
@@ -47,8 +46,7 @@ func TestReadConfig_FileNotFound(t *testing.T) {
 	os.Setenv("APP_ENV", "missing")
 	os.Setenv("CONFIG_PATH", "/nonexistent/path")
 
-	reader := ConfigReader{}
-	_, err := reader.ReadConfig()
+	_, err := GetConfig()
 
 	assert.Error(t, err)
 }
@@ -68,9 +66,7 @@ mongo: invalid_yaml_here
 	os.Setenv("APP_ENV", "dev")
 	os.Setenv("CONFIG_PATH", tmpDir)
 
-	reader := ConfigReader{}
-	_, err = reader.ReadConfig()
+	_, err = GetConfig()
 
 	assert.Error(t, err)
 }
-

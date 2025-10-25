@@ -7,10 +7,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRouterInvalidMongo(t *testing.T) {
-	cfg := mock.ConfigMock(t)
-	cfg.Mongo.ConnectionURL = "mongodb://invalidhost:27017"
-
-	router := SetupRouter(&cfg)
+func TestInvalidConfig(t *testing.T) {
+	router := SetupRouter(nil)
 	assert.Nil(t, router)
+}
+
+func TestValidConfig(t *testing.T) {
+	cfg := mock.ConfigMock(t)
+	router := SetupRouter(cfg)
+	assert.NotNil(t, router)
 }

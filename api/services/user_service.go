@@ -1,69 +1,48 @@
 package services
 
 import (
-	"context"
-	"time"
-	"fmt"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
+	"time"
+	"whisper-api/config"
+	"whisper-api/db"
 
-	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
+	"github.com/google/uuid"
 )
 
-type RawUser struct {
-	Owner string `json:"owner"`
-	Subject string `json:"subject"`
-	Subscribers []string `json:"subscribers,omitempty"`
-}
-
 type User struct {
-	Token string `bson:"_id" json:"id"`
-	Owner string `bson:"owner" json:"owner"`
-	Subject string `bson:"subject" json:"subject"`
-	Subscribers []string `bson:"subscribers" json:"subscribers"`
+	ApiToken string `bson:"_id" json:"id"`
 }
 
-type UserService struct {
-	Collection *mongo.Collection
+type RegisterResponse struct {
+	ApiToken string `json:"api_token"`
 }
 
-const TIMEOUT = 5 * time.Second
+func RegisterUser(cfg *config.Config) (RegisterResponse, error) {
+	rawToken := fmt.Sprintf("%s-%s", uuid.New(), time.Now().String())
+	hash := sha256.Sum256([]byte(rawToken))
+	token := hex.EncodeToString(hash[:])
 
-func (service *UserService) RegisterUser(user *User) error {
-	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
-	defer cancel()
+	data := User{
+		ApiToken: HashToken(token),
+	}
 
-	tokenHash := sha256.Sum256([]byte(user.Token))
-	user.Token = hex.EncodeToString(tokenHash[:])
-	count, err := service.Collection.CountDocuments(ctx, bson.M{"_id": user.Token})
+	var response RegisterResponse
+	err := db.InsertData(cfg, data, data.ApiToken)
 	if err != nil {
-		return err
-	}
-	
-	if count > 0 {
-		return fmt.Errorf("This token already exists in the system")
+		return response, err
 	}
 
-	_, err = service.Collection.InsertOne(ctx, user)
-	return err
+	response = RegisterResponse{ApiToken: token}
+	return response, nil
 }
 
-func (service *UserService) UnregisterUser(token string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
-	defer cancel()
+func RemoveUser(cfg *config.Config, rawToken string) error {
+	return db.DeleteData(cfg, HashToken(rawToken))
+}
 
-	tokenHash := sha256.Sum256([]byte(token))
-	tokenStr := hex.EncodeToString(tokenHash[:])
-	count, err := service.Collection.CountDocuments(ctx, bson.M{"_id": tokenStr})
-	if err != nil {
-		return err
-	}
-	
-	if count <= 0 {
-		return fmt.Errorf("user with token %s does not exists", token)
-	}
-
-	_, err = service.Collection.DeleteOne(ctx, bson.M{"_id": tokenStr})
-	return err
+func HashToken(rawToken string) string {
+	hash := sha256.Sum256([]byte(rawToken))
+	return hex.EncodeToString(hash[:])
 }

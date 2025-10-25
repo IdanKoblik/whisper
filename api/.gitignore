@@ -4,6 +4,8 @@
 # Local
 localdev/
 
+.idea/
+
 # Binaries for programs and plugins
 *.exe
 *.exe~

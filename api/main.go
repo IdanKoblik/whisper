@@ -1,18 +1,21 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"whisper-api/config"
-	"whisper-api/endpoints"
 )
 
+var ctx = context.Background()
+
 func main() {
-	cfg, err := config.ConfigReader{}.ReadConfig()
+	cfg, err := config.GetConfig()
 	if err != nil {
-		fmt.Printf("\nCannot read config file: %v\n", err)
-		return
+		panic(err)
 	}
 
-	router := endpoints.SetupRouter(&cfg)
-	router.Run(cfg.Addr)
+	router := SetupRouter(cfg)
+	err = router.Run(cfg.Addr)
+	if err != nil {
+		panic(err)
+	}
 }

@@ -15,9 +15,160 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/ping": {
+        "/api/admin/register": {
+            "post": {
+                "description": "Allows an admin to create a new API user and receive an API token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Register a new API user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Admin token",
+                        "name": "X-Admin-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "API token for the new user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: Invalid admin token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/unregister/{ApiToken}": {
+            "delete": {
+                "description": "Allows an admin to delete a user by API token",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Unregister a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Admin token",
+                        "name": "X-Admin-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User API token to remove",
+                        "name": "ApiToken",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted {ApiToken}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: Invalid admin token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/message": {
+            "post": {
+                "description": "Sends a message through the API using the user's token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Send a message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User API token",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Message request payload",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.MessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message sent",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/ping": {
             "get": {
-                "description": "Returns \"pong\"",
+                "description": "Simple health check endpoint",
                 "produces": [
                     "text/plain"
                 ],
@@ -34,117 +185,16 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/register": {
-            "post": {
-                "description": "Requires X-Admin-Token header and RawUser JSON body",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Register a new user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Admin Token",
-                        "name": "X-Admin-Token",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "User data",
-                        "name": "rawUser",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/services.RawUser"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "JWT Token",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/unregister/{token}": {
-            "delete": {
-                "description": "Requires X-Admin-Token header and user token as a URL parameter",
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Unregister an existing user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Admin Token",
-                        "name": "X-Admin-Token",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User JWT Token",
-                        "name": "token",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully removed token",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
-        "services.RawUser": {
+        "services.MessageRequest": {
             "type": "object",
             "properties": {
-                "owner": {
+                "device_id": {
                     "type": "string"
                 },
-                "subject": {
+                "message": {
                     "type": "string"
                 },
                 "subscribers": {
@@ -168,8 +218,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {

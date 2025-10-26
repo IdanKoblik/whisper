@@ -7,6 +7,7 @@ import (
 	"time"
 	"whisper-api/config"
 	"whisper-api/db"
+	"whisper-api/utils"
 
 	"github.com/google/uuid"
 )
@@ -25,7 +26,7 @@ func RegisterUser(cfg *config.Config) (RegisterResponse, error) {
 	token := hex.EncodeToString(hash[:])
 
 	data := User{
-		ApiToken: HashToken(token),
+		ApiToken: utils.HashToken(token),
 	}
 
 	var response RegisterResponse
@@ -39,10 +40,5 @@ func RegisterUser(cfg *config.Config) (RegisterResponse, error) {
 }
 
 func RemoveUser(cfg *config.Config, rawToken string) error {
-	return db.DeleteData(cfg, HashToken(rawToken))
-}
-
-func HashToken(rawToken string) string {
-	hash := sha256.Sum256([]byte(rawToken))
-	return hex.EncodeToString(hash[:])
+	return db.DeleteData(cfg, utils.HashToken(rawToken))
 }

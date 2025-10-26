@@ -7,6 +7,7 @@ import (
 	"sync"
 	"whisper-api/config"
 	"whisper-api/db"
+	"whisper-api/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -58,8 +59,13 @@ func HandleWebsocket(cfg *config.Config, c *gin.Context) {
 			continue
 		}
 
-		found, err := db.DoesExists(cfg, apiToken, request.DeviceID)
-		if err != nil || !found {
+		found, err := db.DoesExists(cfg, utils.HashToken(apiToken), request.DeviceID)
+		if err != nil {
+			fmt.Printf("Device validation failed for %s\n", err.Error())
+			continue
+		}
+
+		if !found {
 			fmt.Printf("Device validation failed for %s\n", request.DeviceID)
 			continue
 		}

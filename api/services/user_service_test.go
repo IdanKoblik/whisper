@@ -4,6 +4,7 @@ import (
 	"testing"
 	"whisper-api/db"
 	"whisper-api/mock"
+	"whisper-api/utils"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -15,7 +16,7 @@ func TestRegisterUser(t *testing.T) {
 	assert.NoError(t, err, "RegisterUser should not return an error")
 	assert.NotEmpty(t, resp.ApiToken, "API token should not be empty")
 
-	hash := HashToken(resp.ApiToken)
+	hash := utils.HashToken(resp.ApiToken)
 
 	collection, err := db.MongoCollection(cfg)
 	assert.NoError(t, err, "MongoCollection should not return an error")
@@ -37,7 +38,7 @@ func TestRemoveUser(t *testing.T) {
 	err = RemoveUser(cfg, resp.ApiToken)
 	assert.NoError(t, err, "RemoveUser should not return an error")
 
-	hash := HashToken(resp.ApiToken)
+	hash := utils.HashToken(resp.ApiToken)
 
 	collection, err := db.MongoCollection(cfg)
 	assert.NoError(t, err, "MongoCollection should not return an error")

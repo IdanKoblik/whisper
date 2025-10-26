@@ -6,6 +6,7 @@ import (
 	"whisper-api/config"
 	"whisper-api/db"
 	"whisper-api/services"
+	"whisper-api/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,7 +28,8 @@ var ctx = context.Background()
 // @Router       /api/send [post]
 func SendMessage(cfg *config.Config, c *gin.Context) {
 	apiToken := c.GetHeader("X-Api-Token")
-	found, err := db.DoesExists(cfg, services.HashToken(apiToken), "")
+	token := utils.HashToken(apiToken)
+	found, err := db.DoesExists(cfg, token, "")
 	if err != nil {
 		c.String(400, err.Error())
 		return

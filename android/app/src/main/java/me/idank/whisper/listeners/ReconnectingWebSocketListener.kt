@@ -27,6 +27,7 @@ class ReconnectingWebSocketListener(
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         Log.d("WebSocket", "Connected")
+        Log.d("WebSocket", manager.apiToken)
         reconnectJob?.cancel()
 
         val json = JSONObject().apply { put("device_id", manager.deviceID) }

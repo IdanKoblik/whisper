@@ -1,0 +1,69 @@
+name: Test and Coverage
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    name: Run tests and upload coverage
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.25.2
+          cache: true
+
+      - name: Prepare test config
+        run: |
+          mkdir -p ./localdev
+          cat > ./localdev/config.test.yaml <<EOF
+          addr: ":8080"
+          admin_token: "admin123"
+          rate_limit: 5
+
+          mongo:
+            connection_string: "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=test"
+            database: "whisper"
+
+          redis:
+            addr: "localhost:6379"
+            password: ""
+            db: 0
+          EOF
+
+      - name: Start Docker Compose
+        working-directory: ./api
+        run: docker compose up -d
+
+      - name: Install dependencies
+        working-directory: ./api
+        run: go mod download
+
+      - name: Run tests with coverage
+        working-directory: ./api
+        run: make test
+
+      - name: Generate HTML coverage report
+        working-directory: ./api 
+        run: make coverage.html
+
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ./api/coverage.html
+
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./api/coverage.out
+          format: golang

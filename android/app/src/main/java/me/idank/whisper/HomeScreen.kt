@@ -2,8 +2,12 @@ package me.idank.whisper
 
 import android.content.Intent
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,7 +27,11 @@ fun HomeScreen(apiToken: String, deviceId: String, onLogout: () -> Unit) {
         topBar = {
             TopAppBar(
                 title = { Text("Whisper") },
-                actions = { TextButton(onClick = onLogout) { Text("Logout") } }
+                actions = {
+                    TextButton(onClick = onLogout) {
+                        Text("Logout")
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -34,23 +42,35 @@ fun HomeScreen(apiToken: String, deviceId: String, onLogout: () -> Unit) {
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            // API Token Card
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("API token", style = MaterialTheme.typography.labelLarge)
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(if (showKey) apiToken else "•".repeat(apiToken.length.coerceAtLeast(6)))
+                        Text(
+                            text = if (showKey) apiToken else "•".repeat(apiToken.length.coerceAtLeast(6)),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                         Spacer(Modifier.width(8.dp))
+                        IconButton(onClick = { showKey = !showKey }) {
+                            Icon(
+                                imageVector = if (showKey) Icons.Default.Close else Icons.Default.Lock,
+                                contentDescription = "Toggle token visibility"
+                            )
+                        }
                     }
                 }
             }
 
+            // Device ID Card
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Device ID", style = MaterialTheme.typography.labelLarge)
-                    Text(deviceId)
+                    Text(deviceId, style = MaterialTheme.typography.bodyMedium)
                 }
             }
 
+            // WebSocket URL Card
             Card {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("WebSocket URL", style = MaterialTheme.typography.labelLarge)
@@ -64,6 +84,7 @@ fun HomeScreen(apiToken: String, deviceId: String, onLogout: () -> Unit) {
                 }
             }
 
+            // Service Toggle Card
             Card {
                 Row(
                     modifier = Modifier
@@ -83,13 +104,9 @@ fun HomeScreen(apiToken: String, deviceId: String, onLogout: () -> Unit) {
                         checked = serviceActive,
                         onCheckedChange = { active ->
                             serviceActive = active
-                            WebSocketManager.getInstance(
-                                serverUrl = wsUrl,
-                                apiToken = apiToken,
-                                deviceID = deviceId
-                            )
                             val intent = Intent(context, WebSocketService::class.java)
                             if (active) {
+                                WebSocketManager.getInstance(wsUrl, apiToken, deviceId)
                                 context.startForegroundService(intent)
                             } else {
                                 context.stopService(intent)

@@ -11,6 +11,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write 
+
 jobs:
   go_test:
     uses: ./.github/workflows/callable.go_testing.yml

@@ -1,0 +1,46 @@
+name: Build and Release Go Project
+
+on:
+  workflow_call:
+    inputs:
+      VERSION:
+        description: 'Version name'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+    env:
+      VERSION: ${{ inputs.VERSION }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: api/go.mod
+          cache: true
+
+      - name: Install dependencies
+        working-directory: ./api
+        run: go mod download
+
+      - name: Build binaries
+        working-directory: ./api
+        run: |
+          echo "Building version ${VERSION}..."
+          make build
+          echo "Build complete."
+
+      - name: Generate changelog and create release
+        uses: IdanKoblik/Changelog@production
+        with:
+          version: ${{ inputs.VERSION }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          assets: '["./api/whisper"]'
+

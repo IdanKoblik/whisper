@@ -1,0 +1,30 @@
+name: Main Pipeline
+
+on:
+  push:
+    branches: [main, 24-cicd]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      VERSION:
+        description: 'Version to release'
+        required: true
+        type: string
+
+jobs:
+  go_test:
+    uses: ./.github/workflows/callable.go_testing.yml
+
+  go_build:
+    if: github.event_name == 'workflow_dispatch'
+    needs: go_test
+    uses: ./.github/workflows/callable.go_build.yml
+    with:
+      VERSION: ${{ github.event.inputs.VERSION }} 
+
+  docker:
+    if: github.event_name != 'pull_request'
+    needs: go_test
+    uses: ./.github/workflows/callable.docker.yml
+    with:
+      VERSION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.VERSION || 'latest' }}

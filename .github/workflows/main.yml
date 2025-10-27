@@ -8,8 +8,6 @@ on:
     inputs:
       VERSION:
         description: 'Version to release'
-        required: true
-        type: string
 
 permissions:
   contents: write 

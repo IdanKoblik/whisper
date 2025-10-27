@@ -41,9 +41,8 @@ jobs:
           path: coverage.html
 
       - name: Upload coverage to Coveralls
-        working-directory: ./api
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          file: coverage.out
+          file: ./api/coverage.out
           format: golang

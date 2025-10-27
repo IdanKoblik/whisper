@@ -14,21 +14,83 @@
 </p>
 
 <h1 align="center" style="display: flex; align-items: center; justify-content: center;">
-   System architecture
+   System Architecture
 </h1>
 
 ![SystemDesign](assets/arch.png)
 
+---
+
+## Setup REST API
+
+You can install and run the REST API in multiple ways:
+
+**Using Docker:**
+
+```bash
+docker pull ghcr.io/idankoblik/whisper:<version>
+docker run -e CONFIG_PATH=/path/to/config.yaml -e APP_ENV=env ghcr.io/idankoblik/whisper:<version>
+```
+
+**Using precompiled Linux executable:**
+
+1. Download the binary from GitHub Releases.
+2. Make it executable and run:
+
+```bash
+chmod +x whisper
+CONFIG_PATH=/path/to/config.yaml APP_ENV=env ./whisper
+```
+
+**Building from source:**
+
+1. Clone the repository and navigate to the `api` folder:
+
+```bash
+cd api
+go mod tidy
+make build
+```
+
+2. Run the executable with environment variables:
+
+```bash
+CONFIG_PATH=/path/to/config.yaml APP_ENV=env ./whisper
+```
+
+**Environment variables:**
+
+* `CONFIG_PATH` → path to the configuration file
+* `APP_ENV` → environment (e.g., `env`) used in the config
+
+**Configuration file structure (`config.env.yaml` example):**
+
+```yaml
+addr: ""
+admin_token: ""
+rate_limit: 60 # optional, per minute
+
+mongo:
+  connection_string: ""
+  database: ""
+
+redis:
+  addr: ""
+  password: ""
+  db: 0
+```
+
+---
+
 ## API Reference
 
-#### Register a new API user
+### Register a new API user
 
 Allows an admin to create a new API user and receive an API token
 
 ```http
 POST /api/admin/register
 ```
-
 
 **Header Parameters:**
 
@@ -43,16 +105,16 @@ POST /api/admin/register
 | 200       | API token for the new user        |
 | 400       | Bad Request                       |
 | 401       | Unauthorized: Invalid admin token |
-<br>
 
-#### Unregister a user
+---
+
+### Unregister a user
 
 Allows an admin to delete a user by API token
 
 ```http
 DELETE /api/admin/unregister/{ApiToken}
 ```
-
 
 **Header Parameters:**
 
@@ -67,16 +129,16 @@ DELETE /api/admin/unregister/{ApiToken}
 | 200       | Deleted {ApiToken}                |
 | 400       | Bad Request                       |
 | 401       | Unauthorized: Invalid admin token |
-<br>
 
-#### Send a message
+---
+
+### Send a message
 
 Sends a message through the API using the user's token
 
 ```http
 POST /api/message
 ```
-
 
 **Header Parameters:**
 
@@ -100,9 +162,10 @@ POST /api/message
 | 400       | Bad Request         |
 | 401       | Unauthorized        |
 | 429       | Rate limit exceeded |
-<br>
 
-#### Ping the server
+---
+
+### Ping the server
 
 Simple health check endpoint
 
@@ -110,10 +173,10 @@ Simple health check endpoint
 GET /api/ping
 ```
 
-
 **Responses:**
 
 | HTTP Code | Description |
 | --------- | ----------- |
 | 200       | pong        |
-<br>
+
+---

@@ -19,19 +19,9 @@ import me.idank.whisper.services.WebSocketService
 @Composable
 fun HomeScreen(apiToken: String, deviceId: String, onLogout: () -> Unit) {
     val context = LocalContext.current
-    var wsUrl by rememberSaveable { mutableStateOf("ws://10.5.0.84:8080/ws") }
-    var serviceActive by rememberSaveable { mutableStateOf(true) } // Default: ON
-    var showKey by rememberSaveable { mutableStateOf(false) }
-
-    // Start service once when screen loads
-    LaunchedEffect(Unit) {
-        WebSocketManager.getInstance(
-            serverUrl = wsUrl,
-            apiToken = apiToken,
-            deviceID = deviceId
-        )
-        context.startForegroundService(Intent(context, WebSocketService::class.java))
-    }
+    var wsUrl by remember { mutableStateOf("") }
+    var serviceActive by remember { mutableStateOf(false) }
+    var showKey by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {

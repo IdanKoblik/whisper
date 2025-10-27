@@ -39,8 +39,9 @@ jobs:
 
       - name: Generate changelog and create release
         uses: IdanKoblik/Changelog@prod
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           version: ${{ inputs.VERSION }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           assets: '["./api/whisper"]'
 

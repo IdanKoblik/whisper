@@ -38,7 +38,7 @@ jobs:
           echo "Build complete."
 
       - name: Generate changelog and create release
-        uses: IdanKoblik/Changelog@production
+        uses: IdanKoblik/Changelog@prod
         with:
           version: ${{ inputs.VERSION }}
           github-token: ${{ secrets.GITHUB_TOKEN }}

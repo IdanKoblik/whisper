@@ -21,6 +21,28 @@ jobs:
           go-version: 1.25.2
           cache: true
 
+      - name: Prepare test config
+        run: |
+          mkdir -p ./localdev
+          cat > ./localdev/config.test.yaml <<EOF
+          addr: ":8080"
+          admin_token: "admin123"
+          rate_limit: 5
+
+          mongo:
+            connection_string: "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=test"
+            database: "whisper"
+
+          redis:
+            addr: "localhost:6379"
+            password: ""
+            db: 0
+          EOF
+
+      - name: Start Docker Compose
+        working-directory: ./api
+        run: docker compose up -d
+
       - name: Install dependencies
         working-directory: ./api
         run: go mod download

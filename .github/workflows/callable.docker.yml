@@ -32,10 +32,11 @@ jobs:
       - name: Determine tags
         id: vars
         run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           if [ -n "${{ inputs.VERSION }}" ]; then
-            echo "TAGS=ghcr.io/${{ github.repository }}:${{ inputs.VERSION }}" >> $GITHUB_OUTPUT
+            echo "TAGS=ghcr.io/${REPO_LOWER}:${{ inputs.VERSION }}" >> $GITHUB_OUTPUT
           else
-            echo "TAGS=ghcr.io/${{ github.repository }}:latest" >> $GITHUB_OUTPUT
+            echo "TAGS=ghcr.io/${REPO_LOWER}:latest" >> $GITHUB_OUTPUT
           fi
 
       - name: Set up Go

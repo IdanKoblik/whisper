@@ -3,7 +3,7 @@ name: Main Pipeline
 on:
   workflow_dispatch:
     inputs:
-      name:
+      VERSION:
         description: 'Version name'
         required: true
         type: string

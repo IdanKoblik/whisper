@@ -1,9 +1,6 @@
 name: Main Pipeline
 
 on:
-  push:
-    branches: [main, 24-cicd]
-  pull_request:
   workflow_dispatch:
     inputs:
       VERSION:

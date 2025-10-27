@@ -35,10 +35,9 @@ jobs:
 
       - name: Upload HTML coverage report
         uses: actions/upload-artifact@v4
-        working-directory: ./api
         with:
           name: coverage-report
-          path: coverage.html
+          path: ./api/coverage.html
 
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2

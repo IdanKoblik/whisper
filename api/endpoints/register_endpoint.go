@@ -31,5 +31,5 @@ func RegisterUser(cfg *config.Config, c *gin.Context) {
 		return
 	}
 
-	c.String(200, response.ApiToken)
+	c.String(201, response.ApiToken)
 }

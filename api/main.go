@@ -1,6 +1,7 @@
 package main
 
 import (
+	"whisper-api/communication"
 	"whisper-api/config"
 	"whisper-api/endpoints"
 )
@@ -16,4 +17,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	go communication.HandleHeartbeat(cfg)
 }

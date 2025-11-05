@@ -24,6 +24,7 @@ class ReconnectingWebSocketListener(
     private val mapper = jacksonObjectMapper()
     private val scope = CoroutineScope(Dispatchers.IO)
     private var reconnectJob: Job? = null
+    private var heartbeatJob: Job? = null
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         Log.d("WebSocket", "Connected")
@@ -33,6 +34,8 @@ class ReconnectingWebSocketListener(
         val json = JSONObject().apply { put("device_id", manager.deviceID) }
         webSocket.send(json.toString())
         Log.d("WebSocket", "Sent JSON body: $json")
+
+        scheduleHeartbeat(webSocket)
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
@@ -60,6 +63,17 @@ class ReconnectingWebSocketListener(
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         Log.e("WebSocket", "Failure: ${t.message}")
         scheduleReconnect()
+    }
+
+    private fun scheduleHeartbeat(webSocket: WebSocket) {
+        if (heartbeatJob?.isActive == true)
+            return
+
+        heartbeatJob = scope.launch {
+            delay(5000)
+            Log.d("WebSocket", "Heartbeat")
+            webSocket.send("PING")
+        }
     }
 
     private fun scheduleReconnect() {

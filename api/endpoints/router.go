@@ -21,6 +21,10 @@ func SetupRouter(cfg *config.Config) *gin.Engine {
 	{
 		api.GET("/ping", PingEndpoint)
 
+		api.GET("/status/:DeviceID", func(c *gin.Context) {
+			DeviceStatus(cfg, c)
+		})
+
 		api.POST("/send", func(c *gin.Context) {
 			SendMessage(cfg, c)
 		})

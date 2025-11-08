@@ -113,6 +113,11 @@ func HandleHeartbeat(cfg *config.Config) {
 					wsConn.Close()
 				}
 				delete(Clients, deviceID)
+
+				err := db.RedisConnection(cfg).Del(ctx, "heartbeat:"+deviceID).Err()
+				if err != nil {
+					fmt.Printf("Failed to remove heartbeat key for %s: %v\n", deviceID, err)
+				}
 			}
 		}
 	}

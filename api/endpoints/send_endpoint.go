@@ -1,7 +1,6 @@
 package endpoints
 
 import (
-	"context"
 	"fmt"
 	"whisper-api/config"
 	"whisper-api/db"
@@ -10,8 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-var ctx = context.Background()
 
 // SendMessage godoc
 // @Summary      Send a message

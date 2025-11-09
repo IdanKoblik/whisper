@@ -27,7 +27,7 @@ paths:
       produces:
       - text/plain
       responses:
-        "200":
+        "201":
           description: API token for the new user
           schema:
             type: string
@@ -74,7 +74,20 @@ paths:
       summary: Unregister a user
       tags:
       - Admin
-  /api/message:
+  /api/ping:
+    get:
+      description: Simple health check endpoint
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: pong
+          schema:
+            type: string
+      summary: Ping the server
+      tags:
+      - Health
+  /api/send:
     post:
       consumes:
       - application/json
@@ -113,17 +126,43 @@ paths:
       summary: Send a message
       tags:
       - Messages
-  /api/ping:
+  /api/status/{DeviceID}:
     get:
-      description: Simple health check endpoint
+      consumes:
+      - application/json
+      description: Checks if a given device is registered and active based on its
+        heartbeat record.
+      parameters:
+      - description: API token for authentication
+        in: header
+        name: X-Api-Token
+        required: true
+        type: string
+      - description: Device ID to check status for
+        in: path
+        name: DeviceID
+        required: true
+        type: string
       produces:
       - text/plain
       responses:
         "200":
-          description: pong
+          description: Device is active
           schema:
             type: string
-      summary: Ping the server
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Device not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Check device status
       tags:
-      - Health
+      - Devices
 swagger: "2.0"

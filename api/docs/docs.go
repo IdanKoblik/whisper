@@ -38,7 +38,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "API token for the new user",
                         "schema": {
                             "type": "string"
@@ -107,7 +107,27 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/message": {
+        "/api/ping": {
+            "get": {
+                "description": "Simple health check endpoint",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Ping the server",
+                "responses": {
+                    "200": {
+                        "description": "pong",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/send": {
             "post": {
                 "description": "Sends a message through the API using the user's token",
                 "consumes": [
@@ -166,19 +186,56 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/ping": {
+        "/api/status/{DeviceID}": {
             "get": {
-                "description": "Simple health check endpoint",
+                "description": "Checks if a given device is registered and active based on its heartbeat record.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "text/plain"
                 ],
                 "tags": [
-                    "Health"
+                    "Devices"
                 ],
-                "summary": "Ping the server",
+                "summary": "Check device status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API token for authentication",
+                        "name": "X-Api-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Device ID to check status for",
+                        "name": "DeviceID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "pong",
+                        "description": "Device is active",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Device not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "type": "string"
                         }
@@ -218,6 +275,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

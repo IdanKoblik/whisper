@@ -103,7 +103,7 @@ POST /api/admin/register
 
 | HTTP Code | Description                       |
 | --------- | --------------------------------- |
-| 200       | API token for the new user        |
+| 201       | API token for the new user        |
 | 400       | Bad Request                       |
 | 401       | Unauthorized: Invalid admin token |
 <br>
@@ -132,12 +132,28 @@ DELETE /api/admin/unregister/{ApiToken}
 | 401       | Unauthorized: Invalid admin token |
 <br>
 
+#### Ping the server
+
+Simple health check endpoint
+
+```http
+GET /api/ping
+```
+
+
+**Responses:**
+
+| HTTP Code | Description |
+| --------- | ----------- |
+| 200       | pong        |
+<br>
+
 #### Send a message
 
 Sends a message through the API using the user's token
 
 ```http
-POST /api/message
+POST /api/send
 ```
 
 
@@ -165,18 +181,27 @@ POST /api/message
 | 429       | Rate limit exceeded |
 <br>
 
-#### Ping the server
+#### Check device status
 
-Simple health check endpoint
+Checks if a given device is registered and active based on its heartbeat record.
 
 ```http
-GET /api/ping
+GET /api/status/{DeviceID}
 ```
 
 
+**Header Parameters:**
+
+| Parameter     | Type     | Description                                |
+| ------------- | -------- | ------------------------------------------ |
+| `X-Api-Token` | `string` | **Required**. API token for authentication |
+
 **Responses:**
 
-| HTTP Code | Description |
-| --------- | ----------- |
-| 200       | pong        |
+| HTTP Code | Description           |
+| --------- | --------------------- |
+| 200       | Device is active      |
+| 401       | Unauthorized          |
+| 404       | Device not found      |
+| 500       | Internal server error |
 <br>

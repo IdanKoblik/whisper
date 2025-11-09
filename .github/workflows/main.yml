@@ -2,7 +2,7 @@ name: Main Pipeline
 
 on:
   push:
-    branches: [main, 24-android-cicd]
+    branches: [main]
   pull_request:
   workflow_dispatch:
     inputs:

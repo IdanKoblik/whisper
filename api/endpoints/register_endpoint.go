@@ -14,7 +14,7 @@ import (
 // @Accept       json
 // @Produce      plain
 // @Param        X-Admin-Token header string true "Admin token"
-// @Success      200 {string} string "API token for the new user"
+// @Success      201 {string} string "API token for the new user"
 // @Failure      400 {string} string "Bad Request"
 // @Failure      401 {string} string "Unauthorized: Invalid admin token"
 // @Router       /api/admin/register [post]

@@ -26,7 +26,7 @@ jobs:
 
   docker:
     if: github.event_name != 'pull_request'
-    needs: build 
+    needs: go_test 
     uses: ./.github/workflows/callable.docker.yml
     with:
       VERSION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.VERSION || 'latest' }}

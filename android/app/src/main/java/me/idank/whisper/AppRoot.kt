@@ -17,6 +17,7 @@ fun AppRoot() {
     var isLoggedIn by remember {
         mutableStateOf(apiToken.isNotBlank())
     }
+
     var deviceId by remember { mutableStateOf(
         context.getSavedDeviceID() ?: (UUID.randomUUID().toString() + Instant.now())
     ) }
@@ -48,6 +49,7 @@ fun Context.clearLogin() {
     val prefs = getSharedPreferences("whisper_prefs", Context.MODE_PRIVATE)
     prefs.edit {
         remove("api_token")
+            .remove("device_id")
             .putBoolean("is_logged_in", false)
     }
 }

@@ -7,7 +7,7 @@ PKGS=$(shell go list ./... | grep -v '/docs' | grep -v '/mock' )
 
 test:
 	@echo "Running tests with coverage (excluding docs)..."
-	@go test -covermode=count -coverprofile=$(COVERAGE_FILE) $(PKGS)
+	@go test -count=1 -covermode=count -coverprofile=$(COVERAGE_FILE) $(PKGS)
 	@grep -v "main.go:" $(COVERAGE_FILE) > $(COVERAGE_FILE).filtered
 	@mv $(COVERAGE_FILE).filtered $(COVERAGE_FILE)
 	@echo "Tests complete."

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 	"whisper-api/db"
 	"whisper-api/mock"
 
@@ -60,4 +61,36 @@ func TestHandleWebsocket_InvalidDevice(t *testing.T) {
 	_, exists := Clients["bad-device"]
 	clientsMutex.Unlock()
 	assert.False(t, exists, "invalid device should not be added to Clients map")
+}
+
+func TestHandleWebsocket_Heartbeat(t *testing.T) {
+	server, cleanup := newTestServer(t)
+	defer cleanup()
+
+	wsURL := "ws" + server.URL[len("http"):] + "/ws"
+	header := http.Header{}
+	header.Add("X-Api-Token", "good-token")
+
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, header)
+	assert.NoError(t, err)
+	defer conn.Close()
+
+	req := HeartbeatRequest{
+		DeviceID: "test-device",
+		Ping:     "ping",
+	}
+	data, _ := json.Marshal(req)
+	err = conn.WriteMessage(websocket.TextMessage, data)
+	assert.NoError(t, err)
+
+	cfg := mock.ConfigMock(t)
+	val, err := db.RedisConnection(cfg).Get(ctx, "heartbeat"+"test-device").Result()
+	assert.NoError(t, err)
+	assert.Equal(t, "alive", val)
+
+	time.Sleep(16 * time.Second)
+
+	val, err = db.RedisConnection(cfg).Get(ctx, "heartbeat"+"test-device").Result()
+	assert.Error(t, err, "expected redis key to expire")
+	assert.Empty(t, val)
 }

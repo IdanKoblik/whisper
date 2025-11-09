@@ -19,7 +19,7 @@ func TestRegisterUser_Success(t *testing.T) {
 	req.Header.Set("X-Admin-Token", cfg.AdminToken)
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusCreated, w.Code)
 	assert.NotNil(t, w.Body.String())
 }
 

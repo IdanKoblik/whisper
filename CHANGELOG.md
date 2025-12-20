@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 2025-b2
+- Add support for systemd notifications
 - Complete rewrite to Android app
 - Improved android app stability
 - Complete rewrite to web API

@@ -18,10 +18,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	_ "whisper-api/docs"
-	"log"
-	"whisper-api/communication"
-	"whisper-api/config"
-	"whisper-api/endpoints"
 
 	"github.com/coreos/go-systemd/daemon"
 )

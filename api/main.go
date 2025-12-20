@@ -18,6 +18,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	_ "whisper-api/docs"
+	"log"
+	"whisper-api/communication"
+	"whisper-api/config"
+	"whisper-api/endpoints"
+
+	"github.com/coreos/go-systemd/daemon"
 )
 
 // @title           Whisper API
@@ -89,6 +95,16 @@ func main() {
 
 	err = router.Run(cfg.Addr)
 	if err != nil {
+		if _, notifyErr := daemon.SdNotify(false, "STATUS=Service failed; ERRNO=1"); notifyErr != nil {
+			log.Printf("Failed to notify systemd: %v\n", notifyErr)
+		}
+
 		panic(err)
+	}
+
+	if _, err := daemon.SdNotify(false, "READY=1"); err != nil {
+		log.Printf("Failed to notify systemd: %v\n", err)
+	} else {
+		log.Println("Notified systemd that the service is READY=1")
 	}
 }

@@ -24,7 +24,7 @@ jobs:
       - name: Prepare test config
         run: |
           mkdir -p ./localdev
-          cat > ./localdev/config.test.yaml <<EOF
+          cat > ./localdev/config.yaml <<EOF
           addr: ":8080"
           admin_token: "admin123"
           rate_limit: 5
@@ -32,11 +32,11 @@ jobs:
           mongo:
             connection_string: "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=test"
             database: "whisper"
+            collection: "users"
 
           redis:
             addr: "localhost:6379"
             password: ""
-            db: 0
           EOF
 
       - name: Start Docker Compose
@@ -49,11 +49,11 @@ jobs:
 
       - name: Run tests with coverage
         working-directory: ./api
-        run: make test
+        run: CONFIG_TEST=$(pwd)/localdev make test
 
       - name: Generate HTML coverage report
         working-directory: ./api 
-        run: make coverage.html
+        run: CONFIG_TEST=$(pwd)/localdev make coverage.html
 
       - name: Upload HTML coverage report
         uses: actions/upload-artifact@v4

@@ -29,7 +29,7 @@ You can install and run the REST API in multiple ways:
 
 ```bash
 docker pull ghcr.io/idankoblik/whisper:<version>
-docker run -e CONFIG_PATH=/path/to/config.yaml -e APP_ENV=env ghcr.io/idankoblik/whisper:<version>
+docker run -e CONFIG_PATH=/path/to/config.yaml -e ghcr.io/idankoblik/whisper:<version>
 ```
 
 **Using precompiled Linux executable:**
@@ -39,7 +39,7 @@ docker run -e CONFIG_PATH=/path/to/config.yaml -e APP_ENV=env ghcr.io/idankoblik
 
 ```bash
 chmod +x whisper
-CONFIG_PATH=/path/to/config.yaml APP_ENV=env ./whisper
+CONFIG_PATH=/path/to/config.yaml ./whisper
 ```
 
 **Building from source:**
@@ -55,13 +55,12 @@ make build
 2. Run the executable with environment variables:
 
 ```bash
-CONFIG_PATH=/path/to/config.yaml APP_ENV=env ./whisper
+CONFIG_PATH=/path/to/config.yaml ./whisper
 ```
 
 **Environment variables:**
 
 * `CONFIG_PATH` → path to the configuration file
-* `APP_ENV` → environment (e.g., `env`) used in the config
 
 **Configuration file structure (`config.env.yaml` example):**
 
@@ -73,135 +72,184 @@ rate_limit: 60 # optional, per minute
 mongo:
   connection_string: ""
   database: ""
+  collection: ""
 
 redis:
   addr: ""
   password: ""
-  db: 0
 ```
 
 ---
 
 ## API Reference
 
-#### Register a new API user
+#### Register new API token
 
-Allows an admin to create a new API user and receive an API token
-
-```http
-POST /api/admin/register
-```
-
-
-**Header Parameters:**
-
-| Parameter       | Type     | Description               |
-| --------------- | -------- | ------------------------- |
-| `X-Admin-Token` | `string` | **Required**. Admin token |
-
-**Responses:**
-
-| HTTP Code | Description                       |
-| --------- | --------------------------------- |
-| 201       | API token for the new user        |
-| 400       | Bad Request                       |
-| 401       | Unauthorized: Invalid admin token |
-<br>
-
-#### Unregister a user
-
-Allows an admin to delete a user by API token
+Create a new API token for authentication. Requires admin privileges. Returns the generated API token.
 
 ```http
-DELETE /api/admin/unregister/{ApiToken}
-```
-
-
-**Header Parameters:**
-
-| Parameter       | Type     | Description               |
-| --------------- | -------- | ------------------------- |
-| `X-Admin-Token` | `string` | **Required**. Admin token |
-
-**Responses:**
-
-| HTTP Code | Description                       |
-| --------- | --------------------------------- |
-| 200       | Deleted {ApiToken}                |
-| 400       | Bad Request                       |
-| 401       | Unauthorized: Invalid admin token |
-<br>
-
-#### Ping the server
-
-Simple health check endpoint
-
-```http
-GET /api/ping
+POST /admin/register
 ```
 
 
 **Responses:**
 
-| HTTP Code | Description |
-| --------- | ----------- |
-| 200       | pong        |
+| HTTP Code | Description                          |
+| --------- | ------------------------------------ |
+| 201       | API token created successfully       |
+| 400       | Failed to create token               |
+| 401       | Unauthorized - Admin access required |
 <br>
 
-#### Send a message
+#### Unregister API token
 
-Sends a message through the API using the user's token
+Remove an API token from the database. Requires admin privileges.
+
+```http
+DELETE /admin/unregister/{token}
+```
+
+
+**Responses:**
+
+| HTTP Code | Description                          |
+| --------- | ------------------------------------ |
+| 200       | API token removed successfully       |
+| 400       | Failed to remove token               |
+| 401       | Unauthorized - Admin access required |
+<br>
+
+#### Remove device
+
+Remove a device from the authenticated user's device list
+
+```http
+DELETE /api/devices
+```
+
+
+**Body Parameters:**
+
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `device`  | `string` |             |
+
+**Responses:**
+
+| HTTP Code | Description                                |
+| --------- | ------------------------------------------ |
+| 200       | Device removed successfully                |
+| 400       | Invalid request or failed to remove device |
+| 401       | Unauthorized - Invalid or missing token    |
+<br>
+
+#### Add device
+
+Add a new device to the authenticated user's device list
+
+```http
+POST /api/devices
+```
+
+
+**Body Parameters:**
+
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `device`  | `string` |             |
+
+**Responses:**
+
+| HTTP Code | Description                             |
+| --------- | --------------------------------------- |
+| 201       | Device added successfully               |
+| 400       | Invalid request or failed to add device |
+| 401       | Unauthorized - Invalid or missing token |
+<br>
+
+#### Get device
+
+Check if a device exists and belongs to the authenticated user
+
+```http
+GET /api/devices/{id}
+```
+
+
+**Responses:**
+
+| HTTP Code | Description                             |
+| --------- | --------------------------------------- |
+| 200       | Device found                            |
+| 400       | Invalid request or validation error     |
+| 401       | Unauthorized - Invalid or missing token |
+| 404       | Device not found                        |
+<br>
+
+#### Send message to device
+
+Send a message to a specific device via WebSocket. The device must be active and connected. Rate limiting may apply.
 
 ```http
 POST /api/send
 ```
 
 
-**Header Parameters:**
-
-| Parameter     | Type     | Description                  |
-| ------------- | -------- | ---------------------------- |
-| `X-Api-Token` | `string` | **Required**. User API token |
-
 **Body Parameters:**
 
-| Parameter     | Type            | Description |
-| ------------- | --------------- | ----------- |
-| `device_id`   | `string`        |             |
-| `message`     | `string`        |             |
-| `subscribers` | `array[string]` |             |
+| Parameter | Type            | Description |
+| --------- | --------------- | ----------- |
+| `device`  | `string`        |             |
+| `message` | `string`        |             |
+| `targets` | `array[string]` |             |
 
 **Responses:**
 
-| HTTP Code | Description         |
-| --------- | ------------------- |
-| 200       | Message sent        |
-| 400       | Bad Request         |
-| 401       | Unauthorized        |
-| 429       | Rate limit exceeded |
+| HTTP Code | Description                                              |
+| --------- | -------------------------------------------------------- |
+| 200       | Message sent successfully                                |
+| 400       | Invalid request, device not active, or invalid device id |
+| 401       | Unauthorized - Invalid or missing token                  |
+| 429       | Rate limit exceeded                                      |
 <br>
 
-#### Check device status
+#### Health check endpoint
 
-Checks if a given device is registered and active based on its heartbeat record.
+Check the health status of the server and its dependencies (MongoDB and Redis)
 
 ```http
-GET /api/status/{DeviceID}
+GET /health
 ```
 
 
-**Header Parameters:**
+**Responses:**
 
-| Parameter     | Type     | Description                                |
-| ------------- | -------- | ------------------------------------------ |
-| `X-Api-Token` | `string` | **Required**. API token for authentication |
+| HTTP Code | Description                         |
+| --------- | ----------------------------------- |
+| 200       | Server and dependencies are healthy |
+| 503       | One or more dependencies are down   |
+<br>
+
+#### WebSocket connection endpoint
+
+Establishes a WebSocket connection for real-time messaging. Requires authentication token. Client must send device information in JSON format.
+
+```http
+GET /ws/
+```
+
+
+**Body Parameters:**
+
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `device`  | `string` |             |
 
 **Responses:**
 
-| HTTP Code | Description           |
-| --------- | --------------------- |
-| 200       | Device is active      |
-| 401       | Unauthorized          |
-| 404       | Device not found      |
-| 500       | Internal server error |
+| HTTP Code | Description                                 |
+| --------- | ------------------------------------------- |
+| 101       | WebSocket connection upgraded successfully  |
+| 400       | Invalid payload or device validation failed |
+| 401       | Unauthorized - Invalid or missing token     |
 <br>

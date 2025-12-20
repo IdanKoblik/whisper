@@ -12,8 +12,10 @@ func ConfigMock(t *testing.T) *config.Config {
 	_, b, _, _ := runtime.Caller(0)
 	projectRoot := filepath.Join(filepath.Dir(b), "..", "..")
 
-	os.Setenv("APP_ENV", "test")
-	os.Setenv("CONFIG_PATH", filepath.Join(projectRoot, "localdev"))
+	cfgPath := os.Getenv("CONFIG_PATH")
+	if cfgPath == "" {
+		os.Setenv("CONFIG_PATH", filepath.Join(projectRoot, "localdev"))
+	}
 
 	cfg, err := config.GetConfig()
 	if err != nil {

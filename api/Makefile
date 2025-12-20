@@ -30,4 +30,3 @@ build:
 	@echo "Building binary $(BINARY_NAME)..."
 	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $(BINARY_NAME) .
 	@echo "Build complete."
-

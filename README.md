@@ -1,9 +1,10 @@
-<h1 align="center" style="display: flex; align-items: center; justify-content: center;">
-   Whisper 
+<h1 align="center" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+    Whisper
 </h1>
 
 <div align="center">
-    <img alt="GitHub License" src="https://img.shields.io/github/license/IdanKoblik/whisper">
+   <img alt="GitHub License" src="https://img.shields.io/github/license/IdanKoblik/whisper">
+   <img alt="Coverage" src="https://coveralls.io/repos/github/IdanKoblik/whisper/badge.svg">
 </div>
 
 <br>
@@ -16,7 +17,7 @@
 <h1 align="center" style="display: flex; align-items: center; justify-content: center;">
    System Architecture
 </h1>
-
+   
 ![SystemDesign](assets/arch.png)
 
 <details>

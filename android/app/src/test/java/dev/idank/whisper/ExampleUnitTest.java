@@ -1,4 +1,4 @@
-package dev.idank.application;
+package dev.idank.whisper;
 
 import org.junit.Test;
 

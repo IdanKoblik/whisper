@@ -5,6 +5,9 @@ import static dev.idank.whisper.MainActivity.WS_PREF;
 import static dev.idank.whisper.MainActivity.API_TOKEN_PREF;
 
 import android.Manifest;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -14,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,6 +32,7 @@ import dev.idank.whisper.services.WebsocketService;
 public class HomeActivity extends AppCompatActivity {
 
     private String apiToken;
+    private String deviceId;
     private boolean isTokenVisible = false;
     private TextView txtApiToken;
     private MaterialButton btnToggleToken;
@@ -60,7 +65,7 @@ public class HomeActivity extends AppCompatActivity {
             return;
         }
 
-        String deviceId = getIntent().getStringExtra("deviceId");
+        deviceId = getIntent().getStringExtra("deviceId");
         if (deviceId == null || deviceId.isEmpty()) {
             Log.e("HomeActivity", "Device id not found");
             return;
@@ -73,6 +78,9 @@ public class HomeActivity extends AppCompatActivity {
 
         btnToggleToken = findViewById(R.id.btnToggleToken);
         btnToggleToken.setOnClickListener(this::onToggleTokenClick);
+
+        MaterialButton btnCopyDeviceId = findViewById(R.id.btnCopyDeviceId);
+        btnCopyDeviceId.setOnClickListener(this::onCopyDeviceIdClick);
 
         EditText edtWsUrl = findViewById(R.id.edtWsUrl);
         SharedPreferences prefs = getSharedPreferences(APP_PREFS, MODE_PRIVATE);
@@ -128,6 +136,16 @@ public class HomeActivity extends AppCompatActivity {
             txtApiToken.setText(mask(apiToken));
             btnToggleToken.setText("Show");
         }
+    }
+
+    private void onCopyDeviceIdClick(View view) {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("Device ID", deviceId);
+        clipboard.setPrimaryClip(clip);
+        
+        Log.d("HomeActivity", "Device ID copied to clipboard: " + deviceId);
+        
+        Toast.makeText(this, "Device ID copied to clipboard", Toast.LENGTH_SHORT).show();
     }
 
     private void onLogoutClick(View view) {

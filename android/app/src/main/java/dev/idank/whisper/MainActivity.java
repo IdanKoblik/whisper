@@ -3,6 +3,7 @@ package dev.idank.whisper;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             if (deviceId == null || deviceId.isEmpty()) {
                 deviceId = UUID.randomUUID().toString();
+                Log.d("WHISPER_LOGIN", "Device id: " + deviceId);
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString(DEVICE_ID_PREF, deviceId);
                 editor.apply();

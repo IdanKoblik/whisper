@@ -19,6 +19,12 @@
 
 ![SystemDesign](assets/arch.png)
 
+<details>
+<summary>Whisper in actioin</summary>
+
+![workflow](assets/whisper.gif)
+
+</details>
 ---
 
 ## Setup REST API

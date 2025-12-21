@@ -16,8 +16,8 @@ type MessageRequest struct {
 	Targets []string `json:"targets"`
 }
 
-type MessageResponse struct {
-	Device  string   `json:"device"`
+type WebsocketMessage struct {
+	Message string   `json:"message"`
 	Targets []string `json:"targets"`
 }
 
@@ -76,7 +76,7 @@ func (h *AuthHandler) Send(c *gin.Context) {
 		return
 	}
 
-	payload := MessageRequest{
+	payload := WebsocketMessage{
 		Message: request.Message,
 		Targets: request.Targets,
 	}

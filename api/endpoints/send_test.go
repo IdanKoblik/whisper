@@ -76,7 +76,7 @@ func TestSend(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var received MessageRequest
+	var received WebsocketMessage
 	wsClient.SetReadDeadline(time.Now().Add(time.Second * 2))
 	err = wsClient.ReadJSON(&received)
 

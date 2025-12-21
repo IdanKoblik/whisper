@@ -26,6 +26,7 @@
 ![workflow](assets/whisper.gif)
 
 </details>
+
 ---
 
 ## Setup REST API

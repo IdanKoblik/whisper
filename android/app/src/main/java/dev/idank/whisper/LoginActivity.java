@@ -1,8 +1,8 @@
-package dev.idank.application;
+package dev.idank.whisper;
 
-import static dev.idank.application.MainActivity.APP_PREFS;
-import static dev.idank.application.MainActivity.API_TOKEN_PREF;
-import static dev.idank.application.MainActivity.DEVICE_ID_PREF;
+import static dev.idank.whisper.MainActivity.APP_PREFS;
+import static dev.idank.whisper.MainActivity.API_TOKEN_PREF;
+import static dev.idank.whisper.MainActivity.DEVICE_ID_PREF;
 
 import android.content.Intent;
 import android.content.SharedPreferences;

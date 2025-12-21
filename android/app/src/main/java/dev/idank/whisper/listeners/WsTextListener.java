@@ -1,6 +1,6 @@
-package dev.idank.application.listeners;
+package dev.idank.whisper.listeners;
 
-import static dev.idank.application.MainActivity.WS_PREF;
+import static dev.idank.whisper.MainActivity.WS_PREF;
 
 import android.content.SharedPreferences;
 import android.text.Editable;

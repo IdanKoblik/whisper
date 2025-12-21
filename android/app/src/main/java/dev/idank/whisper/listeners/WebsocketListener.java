@@ -1,11 +1,6 @@
-package dev.idank.application.listeners;
+package dev.idank.whisper.listeners;
 
-import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.telephony.SmsManager;
@@ -13,7 +8,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,9 +19,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import dev.idank.application.clients.WebsocketClient;
-import dev.idank.application.requests.HeartbeatRequest;
-import dev.idank.application.requests.MessageRequest;
+import dev.idank.whisper.clients.WebsocketClient;
+import dev.idank.whisper.requests.HeartbeatRequest;
+import dev.idank.whisper.requests.MessageRequest;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;

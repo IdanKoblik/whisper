@@ -1,8 +1,8 @@
-package dev.idank.application;
+package dev.idank.whisper;
 
-import static dev.idank.application.MainActivity.APP_PREFS;
-import static dev.idank.application.MainActivity.WS_PREF;
-import static dev.idank.application.MainActivity.API_TOKEN_PREF;
+import static dev.idank.whisper.MainActivity.APP_PREFS;
+import static dev.idank.whisper.MainActivity.WS_PREF;
+import static dev.idank.whisper.MainActivity.API_TOKEN_PREF;
 
 import android.Manifest;
 import android.content.Intent;
@@ -22,8 +22,8 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
-import dev.idank.application.listeners.WsTextListener;
-import dev.idank.application.services.WebsocketService;
+import dev.idank.whisper.listeners.WsTextListener;
+import dev.idank.whisper.services.WebsocketService;
 
 public class HomeActivity extends AppCompatActivity {
 

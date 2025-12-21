@@ -1,4 +1,4 @@
-package dev.idank.application.services;
+package dev.idank.whisper.services;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -14,8 +14,8 @@ import androidx.core.app.NotificationCompat;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import dev.idank.application.R;
-import dev.idank.application.clients.WebsocketClient;
+import dev.idank.whisper.R;
+import dev.idank.whisper.clients.WebsocketClient;
 
 public class WebsocketService extends Service {
 

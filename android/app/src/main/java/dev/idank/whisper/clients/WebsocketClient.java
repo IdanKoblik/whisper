@@ -1,4 +1,4 @@
-package dev.idank.application.clients;
+package dev.idank.whisper.clients;
 
 import android.content.Context;
 import android.util.Log;
@@ -6,7 +6,7 @@ import android.util.Log;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import dev.idank.application.listeners.WebsocketListener;
+import dev.idank.whisper.listeners.WebsocketListener;
 import lombok.Getter;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

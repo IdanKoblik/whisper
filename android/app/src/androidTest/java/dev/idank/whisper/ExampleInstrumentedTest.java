@@ -1,4 +1,4 @@
-package dev.idank.application;
+package dev.idank.whisper;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("dev.idank.application", appContext.getPackageName());
+        assertEquals("dev.idank.whisperr", appContext.getPackageName());
     }
 }

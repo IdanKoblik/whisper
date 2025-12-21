@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-    namespace = "dev.idank.application"
+    namespace = "dev.idank.whisper"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "dev.idank.application"
+        applicationId = "dev.idank.whisper"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

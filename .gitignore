@@ -7,3 +7,4 @@ localdev/
 /android/.kotlin/
 /android/app/.idea/
 /android/app/.gradle/
+venv/

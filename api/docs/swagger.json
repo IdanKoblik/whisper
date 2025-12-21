@@ -1,12 +1,24 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "API for real-time messaging via WebSocket",
+        "title": "Whisper API",
+        "contact": {},
+        "license": {
+            "name": "GNU 3.0",
+            "url": "https://github.com/IdanKoblik/whisper/blob/main/LICENSE.md"
+        },
+        "version": "2025-b2"
     },
     "paths": {
-        "/api/admin/register": {
+        "/admin/register": {
             "post": {
-                "description": "Allows an admin to create a new API user and receive an API token",
+                "security": [
+                    {
+                        "AdminAuth": []
+                    }
+                ],
+                "description": "Create a new API token for authentication. Requires admin privileges. Returns the generated API token.",
                 "consumes": [
                     "application/json"
                 ],
@@ -14,111 +26,137 @@
                     "text/plain"
                 ],
                 "tags": [
-                    "Admin"
+                    "admin"
                 ],
-                "summary": "Register a new API user",
+                "summary": "Register new API token",
+                "responses": {
+                    "201": {
+                        "description": "API token created successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed to create token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Admin access required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/unregister/{token}": {
+            "delete": {
+                "security": [
+                    {
+                        "AdminAuth": []
+                    }
+                ],
+                "description": "Remove an API token from the database. Requires admin privileges.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Unregister API token",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Admin token",
-                        "name": "X-Admin-Token",
-                        "in": "header",
+                        "description": "API token to remove",
+                        "name": "token",
+                        "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "API token removed successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed to remove token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Admin access required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/devices": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Add a new device to the authenticated user's device list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "devices"
+                ],
+                "summary": "Add device",
+                "parameters": [
+                    {
+                        "description": "Device information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/endpoints.DeviceRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "API token for the new user",
+                        "description": "Device added successfully",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request or failed to add device",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized: Invalid admin token",
+                        "description": "Unauthorized - Invalid or missing token",
                         "schema": {
                             "type": "string"
                         }
                     }
                 }
-            }
-        },
-        "/api/admin/unregister/{ApiToken}": {
+            },
             "delete": {
-                "description": "Allows an admin to delete a user by API token",
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Admin"
-                ],
-                "summary": "Unregister a user",
-                "parameters": [
+                "security": [
                     {
-                        "type": "string",
-                        "description": "Admin token",
-                        "name": "X-Admin-Token",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User API token to remove",
-                        "name": "ApiToken",
-                        "in": "path",
-                        "required": true
+                        "ApiKeyAuth": []
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "Deleted {ApiToken}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized: Invalid admin token",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/ping": {
-            "get": {
-                "description": "Simple health check endpoint",
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Health"
-                ],
-                "summary": "Ping the server",
-                "responses": {
-                    "200": {
-                        "description": "pong",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/send": {
-            "post": {
-                "description": "Sends a message through the API using the user's token",
+                "description": "Remove a device from the authenticated user's device list",
                 "consumes": [
                     "application/json"
                 ],
@@ -126,48 +164,35 @@
                     "text/plain"
                 ],
                 "tags": [
-                    "Messages"
+                    "devices"
                 ],
-                "summary": "Send a message",
+                "summary": "Remove device",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "User API token",
-                        "name": "X-Api-Token",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "Message request payload",
-                        "name": "message",
+                        "description": "Device information",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.MessageRequest"
+                            "$ref": "#/definitions/endpoints.DeviceRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Message sent",
+                        "description": "Device removed successfully",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid request or failed to remove device",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "429": {
-                        "description": "Rate limit exceeded",
+                        "description": "Unauthorized - Invalid or missing token",
                         "schema": {
                             "type": "string"
                         }
@@ -175,9 +200,14 @@
                 }
             }
         },
-        "/api/status/{DeviceID}": {
+        "/api/devices/{id}": {
             "get": {
-                "description": "Checks if a given device is registered and active based on its heartbeat record.",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Check if a device exists and belongs to the authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -185,34 +215,33 @@
                     "text/plain"
                 ],
                 "tags": [
-                    "Devices"
+                    "devices"
                 ],
-                "summary": "Check device status",
+                "summary": "Get device",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "API token for authentication",
-                        "name": "X-Api-Token",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Device ID to check status for",
-                        "name": "DeviceID",
+                        "description": "Device ID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Device is active",
+                        "description": "Device found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or validation error",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - Invalid or missing token",
                         "schema": {
                             "type": "string"
                         }
@@ -222,9 +251,151 @@
                         "schema": {
                             "type": "string"
                         }
+                    }
+                }
+            }
+        },
+        "/api/send": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Send a message to a specific device via WebSocket. The device must be active and connected. Rate limiting may apply.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "messaging"
+                ],
+                "summary": "Send message to device",
+                "parameters": [
+                    {
+                        "description": "Message request with device and targets",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/endpoints.MessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message sent successfully",
+                        "schema": {
+                            "type": "string"
+                        }
                     },
-                    "500": {
-                        "description": "Internal server error",
+                    "400": {
+                        "description": "Invalid request, device not active, or invalid device id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or missing token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "headers": {
+                            "Retry-After": {
+                                "type": "string",
+                                "description": "Number of seconds to wait before retrying"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Check the health status of the server and its dependencies (MongoDB and Redis)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check endpoint",
+                "responses": {
+                    "200": {
+                        "description": "Server and dependencies are healthy",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "503": {
+                        "description": "One or more dependencies are down",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/ws/": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Establishes a WebSocket connection for real-time messaging. Requires authentication token. Client must send device information in JSON format.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "websocket"
+                ],
+                "summary": "WebSocket connection endpoint",
+                "parameters": [
+                    {
+                        "description": "Device information",
+                        "name": "device",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/endpoints.WebsocketRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "WebSocket connection upgraded successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid payload or device validation failed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or missing token",
                         "schema": {
                             "type": "string"
                         }
@@ -234,22 +405,52 @@
         }
     },
     "definitions": {
-        "services.MessageRequest": {
+        "endpoints.DeviceRequest": {
             "type": "object",
             "properties": {
-                "device_id": {
+                "device": {
+                    "type": "string"
+                }
+            }
+        },
+        "endpoints.MessageRequest": {
+            "type": "object",
+            "properties": {
+                "device": {
                     "type": "string"
                 },
                 "message": {
                     "type": "string"
                 },
-                "subscribers": {
+                "targets": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 }
             }
+        },
+        "endpoints.WebsocketRequest": {
+            "type": "object",
+            "properties": {
+                "device": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "AdminAuth": {
+            "description": "Admin token for administrative operations",
+            "type": "apiKey",
+            "name": "X-Admin-Token",
+            "in": "header"
+        },
+        "ApiKeyAuth": {
+            "description": "API token for authentication",
+            "type": "apiKey",
+            "name": "X-API-Token",
+            "in": "header"
         }
     }
 }

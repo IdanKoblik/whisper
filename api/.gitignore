@@ -3,6 +3,7 @@
 #
 # Local
 localdev/
+whisper
 
 .idea/
 
@@ -33,5 +34,5 @@ go.work.sum
 .env
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/

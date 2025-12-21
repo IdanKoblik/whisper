@@ -1,168 +1,296 @@
 definitions:
-  services.MessageRequest:
+  endpoints.DeviceRequest:
     properties:
-      device_id:
+      device:
+        type: string
+    type: object
+  endpoints.MessageRequest:
+    properties:
+      device:
         type: string
       message:
         type: string
-      subscribers:
+      targets:
         items:
           type: string
         type: array
     type: object
+  endpoints.WebsocketRequest:
+    properties:
+      device:
+        type: string
+    type: object
 info:
   contact: {}
+  description: API for real-time messaging via WebSocket
+  license:
+    name: GNU 3.0
+    url: https://github.com/IdanKoblik/whisper/blob/main/LICENSE.md
+  title: Whisper API
+  version: 2025-b2
 paths:
-  /api/admin/register:
+  /admin/register:
     post:
       consumes:
       - application/json
-      description: Allows an admin to create a new API user and receive an API token
-      parameters:
-      - description: Admin token
-        in: header
-        name: X-Admin-Token
-        required: true
-        type: string
+      description: Create a new API token for authentication. Requires admin privileges.
+        Returns the generated API token.
       produces:
       - text/plain
       responses:
         "201":
-          description: API token for the new user
+          description: API token created successfully
           schema:
             type: string
         "400":
-          description: Bad Request
+          description: Failed to create token
           schema:
             type: string
         "401":
-          description: 'Unauthorized: Invalid admin token'
+          description: Unauthorized - Admin access required
           schema:
             type: string
-      summary: Register a new API user
+      security:
+      - AdminAuth: []
+      summary: Register new API token
       tags:
-      - Admin
-  /api/admin/unregister/{ApiToken}:
+      - admin
+  /admin/unregister/{token}:
     delete:
-      description: Allows an admin to delete a user by API token
+      consumes:
+      - application/json
+      description: Remove an API token from the database. Requires admin privileges.
       parameters:
-      - description: Admin token
-        in: header
-        name: X-Admin-Token
-        required: true
-        type: string
-      - description: User API token to remove
+      - description: API token to remove
         in: path
-        name: ApiToken
+        name: token
         required: true
         type: string
       produces:
       - text/plain
       responses:
         "200":
-          description: Deleted {ApiToken}
+          description: API token removed successfully
           schema:
             type: string
         "400":
-          description: Bad Request
+          description: Failed to remove token
           schema:
             type: string
         "401":
-          description: 'Unauthorized: Invalid admin token'
+          description: Unauthorized - Admin access required
           schema:
             type: string
-      summary: Unregister a user
+      security:
+      - AdminAuth: []
+      summary: Unregister API token
       tags:
-      - Admin
-  /api/ping:
-    get:
-      description: Simple health check endpoint
+      - admin
+  /api/devices:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a device from the authenticated user's device list
+      parameters:
+      - description: Device information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/endpoints.DeviceRequest'
       produces:
       - text/plain
       responses:
         "200":
-          description: pong
+          description: Device removed successfully
           schema:
             type: string
-      summary: Ping the server
+        "400":
+          description: Invalid request or failed to remove device
+          schema:
+            type: string
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Remove device
       tags:
-      - Health
-  /api/send:
+      - devices
     post:
       consumes:
       - application/json
-      description: Sends a message through the API using the user's token
+      description: Add a new device to the authenticated user's device list
       parameters:
-      - description: User API token
-        in: header
-        name: X-Api-Token
-        required: true
-        type: string
-      - description: Message request payload
+      - description: Device information
         in: body
-        name: message
+        name: request
         required: true
         schema:
-          $ref: '#/definitions/services.MessageRequest'
+          $ref: '#/definitions/endpoints.DeviceRequest'
       produces:
       - text/plain
       responses:
-        "200":
-          description: Message sent
+        "201":
+          description: Device added successfully
           schema:
             type: string
         "400":
-          description: Bad Request
+          description: Invalid request or failed to add device
           schema:
             type: string
         "401":
-          description: Unauthorized
+          description: Unauthorized - Invalid or missing token
           schema:
             type: string
-        "429":
-          description: Rate limit exceeded
-          schema:
-            type: string
-      summary: Send a message
+      security:
+      - ApiKeyAuth: []
+      summary: Add device
       tags:
-      - Messages
-  /api/status/{DeviceID}:
+      - devices
+  /api/devices/{id}:
     get:
       consumes:
       - application/json
-      description: Checks if a given device is registered and active based on its
-        heartbeat record.
+      description: Check if a device exists and belongs to the authenticated user
       parameters:
-      - description: API token for authentication
-        in: header
-        name: X-Api-Token
-        required: true
-        type: string
-      - description: Device ID to check status for
+      - description: Device ID
         in: path
-        name: DeviceID
+        name: id
         required: true
         type: string
       produces:
       - text/plain
       responses:
         "200":
-          description: Device is active
+          description: Device found
+          schema:
+            type: string
+        "400":
+          description: Invalid request or validation error
           schema:
             type: string
         "401":
-          description: Unauthorized
+          description: Unauthorized - Invalid or missing token
           schema:
             type: string
         "404":
           description: Device not found
           schema:
             type: string
-        "500":
-          description: Internal server error
+      security:
+      - ApiKeyAuth: []
+      summary: Get device
+      tags:
+      - devices
+  /api/send:
+    post:
+      consumes:
+      - application/json
+      description: Send a message to a specific device via WebSocket. The device must
+        be active and connected. Rate limiting may apply.
+      parameters:
+      - description: Message request with device and targets
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/endpoints.MessageRequest'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Message sent successfully
           schema:
             type: string
-      summary: Check device status
+        "400":
+          description: Invalid request, device not active, or invalid device id
+          schema:
+            type: string
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            type: string
+        "429":
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Number of seconds to wait before retrying
+              type: string
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Send message to device
       tags:
-      - Devices
+      - messaging
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check the health status of the server and its dependencies (MongoDB
+        and Redis)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Server and dependencies are healthy
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: One or more dependencies are down
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check endpoint
+      tags:
+      - health
+  /ws/:
+    get:
+      consumes:
+      - application/json
+      description: Establishes a WebSocket connection for real-time messaging. Requires
+        authentication token. Client must send device information in JSON format.
+      parameters:
+      - description: Device information
+        in: body
+        name: device
+        required: true
+        schema:
+          $ref: '#/definitions/endpoints.WebsocketRequest'
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: WebSocket connection upgraded successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid payload or device validation failed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: WebSocket connection endpoint
+      tags:
+      - websocket
+securityDefinitions:
+  AdminAuth:
+    description: Admin token for administrative operations
+    in: header
+    name: X-Admin-Token
+    type: apiKey
+  ApiKeyAuth:
+    description: API token for authentication
+    in: header
+    name: X-API-Token
+    type: apiKey
 swagger: "2.0"

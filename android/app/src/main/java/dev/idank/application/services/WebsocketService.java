@@ -20,7 +20,6 @@ import dev.idank.application.clients.WebsocketClient;
 public class WebsocketService extends Service {
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-
     private WebsocketClient wsClient;
 
     @Override
@@ -37,7 +36,7 @@ public class WebsocketService extends Service {
             String websocketURL = intent.getStringExtra("websocketURL");
             String deviceID = intent.getStringExtra("deviceID");
 
-            WebsocketClient.setInstance(apiToken, websocketURL, deviceID);
+            WebsocketClient.setInstance(this, apiToken, websocketURL, deviceID);
             wsClient = WebsocketClient.getInstance();
 
             executorService.submit(wsClient::connect);
@@ -62,7 +61,7 @@ public class WebsocketService extends Service {
     }
 
     private Notification createNotification() {
-        final String channelId = "whisper_service_channel";
+        String channelId = "whisper_service_channel";
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(

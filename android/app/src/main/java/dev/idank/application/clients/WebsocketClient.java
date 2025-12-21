@@ -20,29 +20,17 @@ public class WebsocketClient {
     private final String apiToken;
     private final String websocketURL;
     private final WebsocketListener wsListener;
+    private final Context context;
 
     @Getter
     private final String deviceID;
 
     private WebSocket websocket;
-
     private volatile boolean connecting = false;
     private volatile boolean connected = false;
 
-    public static synchronized void setInstance(String apiToken, String websocketURL, String deviceID) {
-        if (instance == null) {
-            instance = new WebsocketClient(apiToken, websocketURL, deviceID);
-        }
-    }
-
-    public static WebsocketClient getInstance() {
-        if (instance == null) {
-            throw new IllegalStateException("WebsocketClient not initialized");
-        }
-        return instance;
-    }
-
-    private WebsocketClient(String apiToken, String websocketURL, String deviceID) {
+    private WebsocketClient(Context context, String apiToken, String websocketURL, String deviceID) {
+        this.context = context.getApplicationContext();
         this.apiToken = apiToken;
         this.websocketURL = websocketURL;
         this.deviceID = deviceID;
@@ -51,7 +39,18 @@ public class WebsocketClient {
                 .readTimeout(0, TimeUnit.MILLISECONDS)
                 .build();
 
-        this.wsListener = new WebsocketListener(this);
+        this.wsListener = new WebsocketListener(this.context, this);
+    }
+
+    public static synchronized void setInstance(Context context, String apiToken, String websocketURL, String deviceID) {
+        if (instance == null) {
+            instance = new WebsocketClient(context, apiToken, websocketURL, deviceID);
+        }
+    }
+
+    public static WebsocketClient getInstance() {
+        if (instance == null) throw new IllegalStateException("WebsocketClient not initialized");
+        return instance;
     }
 
     public synchronized void connect() {
@@ -65,32 +64,24 @@ public class WebsocketClient {
                 .build();
 
         websocket = client.newWebSocket(request, wsListener);
-
-        Log.d(getClass().getName(), "Connecting to " + websocketURL);
+        Log.d("WebsocketClient", "Connecting to " + websocketURL);
     }
 
     public CompletableFuture<Void> disconnect() {
         CompletableFuture<Void> future = new CompletableFuture<>();
-
         if (websocket == null) {
             future.complete(null);
             return future;
         }
 
         boolean closed = websocket.close(1000, "Client closed");
-
-        if (closed) {
-            future.complete(null);
-        } else {
-            future.completeExceptionally(new RuntimeException("Failed to close websocket"));
-        }
-
+        if (closed) future.complete(null);
+        else future.completeExceptionally(new RuntimeException("Failed to close websocket"));
         return future;
     }
 
     public synchronized void reconnect() {
         if (connected || connecting) return;
-
         disconnect().whenComplete((v, e) -> connect());
     }
 
@@ -99,7 +90,7 @@ public class WebsocketClient {
             connected = false;
             connecting = false;
             instance = null;
-            Log.d(getClass().getName(), "WebSocket shutdown");
+            Log.d("WebsocketClient", "WebSocket shutdown");
         });
     }
 

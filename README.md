@@ -21,7 +21,7 @@
 ![SystemDesign](assets/arch.png)
 
 <details>
-<summary>Whisper in actioin</summary>
+<summary>Whisper in action</summary>
 
 ![workflow](assets/whisper.gif)
 
